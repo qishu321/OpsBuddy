@@ -9,5 +9,15 @@ cmd/opsbuddy-desktop/rsrc*.syso
 *.log
 *.tsbuildinfo
 .env
+.env.*
+!.env.example
+*.exe
+*.db
+*.db-*
+*.pem
+*.key
+demos/*/runs/
+demos/*/verification-summary.json
+demos/*/LATEST.txt
 playwright-report/
 test-results/

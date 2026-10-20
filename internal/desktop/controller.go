@@ -1,4 +1,4 @@
-//go:build windows
+//go:build windows || linux
 
 package desktop
 
@@ -6,15 +6,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"opsbuddy/internal/version"
 	"os"
 	"path/filepath"
+	goruntime "runtime"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
-	"unsafe"
 
 	wr "github.com/wailsapp/wails/v2/pkg/runtime"
 	"opsbuddy/internal/app"
@@ -251,7 +252,7 @@ func (c *Controller) RevealAsset(assetID string) error {
 	if err != nil {
 		return err
 	}
-	return shellOpen("explorer.exe", "/select,\""+path+"\"")
+	return revealPath(path)
 }
 
 func (c *Controller) OpenAsset(assetID string) error {
@@ -299,7 +300,7 @@ func (c *Controller) Info() map[string]string {
 	if c.smoke {
 		smoke = "true"
 	}
-	info := map[string]string{"mode": "desktop", "version": "0.17.1", "dataDirectory": c.dataRoot, "smokeTest": smoke}
+	info := map[string]string{"mode": "desktop", "version": version.Version, "platform": goruntime.GOOS, "petSupported": fmt.Sprint(goruntime.GOOS == "windows"), "dataDirectory": c.dataRoot, "smokeTest": smoke}
 	if c.smoke && os.Getenv("OPSBUDDY_SMOKE_IMPORT_DEMO") == "1" {
 		info["smokeImportDemo"] = "true"
 	}
@@ -342,23 +343,6 @@ func (c *Controller) ReportSmoke(jsonReport string) error {
 		return err
 	}
 	wr.Quit(c.ctx)
-	return nil
-}
-
-func shellOpen(path, arguments string) error {
-	operation, _ := syscall.UTF16PtrFromString("open")
-	file, err := syscall.UTF16PtrFromString(path)
-	if err != nil {
-		return err
-	}
-	args, err := syscall.UTF16PtrFromString(arguments)
-	if err != nil {
-		return err
-	}
-	result, _, _ := syscall.NewLazyDLL("shell32.dll").NewProc("ShellExecuteW").Call(0, uintptr(unsafe.Pointer(operation)), uintptr(unsafe.Pointer(file)), uintptr(unsafe.Pointer(args)), 0, 1)
-	if result <= 32 {
-		return errors.New("Windows 无法打开该文件，请检查关联程序是否已安装")
-	}
 	return nil
 }
 

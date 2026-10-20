@@ -35,6 +35,8 @@ interface NativeAPI {
   Info(): Promise<{
     mode: string;
     version: string;
+    platform?: string;
+    petSupported?: string;
     dataDirectory: string;
     smokeTest: string;
     smokeModelURL?: string;

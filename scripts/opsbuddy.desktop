@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=OpsBuddy
+Comment=Lightweight AI office and development desktop assistant
+Exec=opsbuddy
+Terminal=false
+Categories=Office;Development;
+StartupWMClass=opsbuddy

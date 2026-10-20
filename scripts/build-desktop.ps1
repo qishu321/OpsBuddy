@@ -33,7 +33,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Windows resources could not be generated.' }
 & go build -trimpath -tags production -ldflags '-s -w -H windowsgui' -o (Join-Path $releaseRoot $BinaryName) ./cmd/opsbuddy-desktop
 if ($LASTEXITCODE -ne 0) { throw 'Desktop Go build failed. Close OpsBuddy before rebuilding.' }
 $portableReadme = @'
-OpsBuddy 0.17.1 - Windows desktop preview
+OpsBuddy - Windows desktop preview
 
 Double-click OpsBuddy.exe. No Node.js, Go compiler or browser startup is needed.
 The UI and Go backend are embedded in this application.
@@ -51,6 +51,7 @@ $portableReadme.Replace('Double-click OpsBuddy.exe.', ('Double-click ' + $Binary
 $archive = Join-Path $workspaceRoot 'release\OpsBuddy-Windows-amd64.zip'
 Write-Host ('Desktop EXE: ' + (Join-Path $releaseRoot $BinaryName))
 if ($Package) {
-    Compress-Archive -LiteralPath (Join-Path $releaseRoot $BinaryName),(Join-Path $releaseRoot 'README.txt') -DestinationPath $archive -Force
+    Copy-Item -LiteralPath 'README.md','README.en.md' -Destination $releaseRoot
+    Compress-Archive -LiteralPath (Join-Path $releaseRoot $BinaryName),(Join-Path $releaseRoot 'README.txt'),(Join-Path $releaseRoot 'README.md'),(Join-Path $releaseRoot 'README.en.md') -DestinationPath $archive -Force
     Write-Host ('Portable package: ' + $archive)
 }

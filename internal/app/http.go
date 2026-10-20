@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net/http"
 	"net/url"
+	"opsbuddy/internal/version"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,7 +36,7 @@ func (a *App) Handler() http.Handler {
 	m := http.NewServeMux()
 	m.HandleFunc("GET /api/state", func(w http.ResponseWriter, r *http.Request) { respond(w, 200, a.snapshot()) })
 	m.HandleFunc("GET /api/health", func(w http.ResponseWriter, r *http.Request) {
-		respond(w, 200, map[string]string{"status": "ok", "version": "0.17.1", "backend": "Go"})
+		respond(w, 200, map[string]string{"status": "ok", "version": version.Version, "backend": "Go"})
 	})
 	m.HandleFunc("POST /api/projects", a.createProject)
 	m.HandleFunc("PUT /api/projects/{id}", a.updateProject)

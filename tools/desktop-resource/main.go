@@ -2,11 +2,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/tc-hib/winres"
 	"github.com/tc-hib/winres/version"
 	"image"
 	"image/color"
 	"log"
+	releaseversion "opsbuddy/internal/version"
 	"os"
 )
 
@@ -44,19 +46,19 @@ func main() {
 	if err = resources.SetIcon(winres.RT_ICON, icon); err != nil {
 		log.Fatal(err)
 	}
-	manifest, err := winres.AppManifestFromXML([]byte(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+	manifest, err := winres.AppManifestFromXML([]byte(fmt.Sprintf(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
- <assemblyIdentity type="win32" name="OpsBuddy.Desktop" version="0.17.1.0" processorArchitecture="*"/>
+ <assemblyIdentity type="win32" name="OpsBuddy.Desktop" version="%s.0" processorArchitecture="*"/>
  <dependency><dependentAssembly><assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/></dependentAssembly></dependency>
  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3"><security><requestedPrivileges><requestedExecutionLevel level="asInvoker" uiAccess="false"/></requestedPrivileges></security></trustInfo>
  <asmv3:application><asmv3:windowsSettings><dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true/pm</dpiAware><dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2,PerMonitor</dpiAwareness><longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">true</longPathAware></asmv3:windowsSettings></asmv3:application>
-</assembly>`))
+</assembly>`, releaseversion.Version)))
 	if err != nil {
 		log.Fatal(err)
 	}
 	resources.SetManifest(manifest)
-	info := version.Info{FileVersion: [4]uint16{0, 17, 1, 0}, ProductVersion: [4]uint16{0, 17, 1, 0}, Type: version.App}
-	for key, value := range map[string]string{version.ProductName: "OpsBuddy", version.FileDescription: "OpsBuddy Desktop", version.OriginalFilename: "OpsBuddy.exe", version.FileVersion: "0.17.1", version.ProductVersion: "0.17.1"} {
+	info := version.Info{FileVersion: [4]uint16{0, 18, 0, 0}, ProductVersion: [4]uint16{0, 18, 0, 0}, Type: version.App}
+	for key, value := range map[string]string{version.ProductName: "OpsBuddy", version.FileDescription: "OpsBuddy Desktop", version.OriginalFilename: "OpsBuddy.exe", version.FileVersion: releaseversion.Version, version.ProductVersion: releaseversion.Version} {
 		if err = info.Set(version.LangDefault, key, value); err != nil {
 			log.Fatal(err)
 		}

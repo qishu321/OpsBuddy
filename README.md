@@ -1,135 +1,120 @@
 # OpsBuddy
 
-轻量 AI 办公与开发桌面程序。**Wails + Go 后端 + React / TypeScript 界面**，直接启动 Windows EXE，按需配置模型，不依赖腾讯生态或 Python 服务。
+**轻量 AI 办公与开发桌面助手 · Go + React + Wails**
 
-当前为 **0.16.1 Windows 桌面开发预览版**，新增项目协作的真实模型规划、成员独立模型、依赖调度、有限返工与源码集成；保留直接问答、办公文件、工作流和轻量桌宠。界面和 Go 后端内嵌在同一 EXE，桌面应用本身无需浏览器、Node.js 或 Go 编译器；运行生成的代码项目需要对应本机语言环境。完整范围见 [实现状态](docs/implementation-status.md)。
+简体中文 | [English](README.en.md)
 
-用户最新确认的范围：**日常办公 + 代码开发 + 桌面内网页与 Markdown 预览**，保持轻量。详见 [当前产品方向](docs/product-direction.md)；其中待开发能力以实现状态为准。
+[下载预览版](https://github.com/qishu321/OpsBuddy/releases) · [构建状态](https://github.com/qishu321/OpsBuddy/actions/workflows/release.yml) · [实现状态](docs/implementation-status.md)
 
-## 启动
+OpsBuddy 把对话、日常文档、代码项目与预览放在一个桌面工作空间。配置自己的模型服务，让多个角色处理同一项目，保留执行记录和源码。应用使用系统 WebView，不捆绑 Electron 或独立浏览器，也不需要常驻 Python 服务。
 
-**直接使用**：双击 `release/OpsBuddy/OpsBuddy.exe`，或双击根目录 `start.cmd`。可将 `release/OpsBuddy-Windows-amd64.zip` 解压到可写目录后运行。程序使用系统已安装的 Microsoft Edge WebView2 Runtime；本机已检测到该运行时。
+当前版本：**v0.18.0，开发预览版**。支持 Windows x64 与 Linux x64；原生桌宠暂仅 Windows 支持。
 
-**从源码构建**（需要 Go 1.26+、Node.js 22+、npm，首次需联网）：
+## 常用能力
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-desktop.ps1
+- **对话与项目**：会话按项目分组，项目之间隔离上下文；历史搜索、删除、归档和继续修改。
+- **添加材料**：选择文件/文件夹，粘贴截图或拖入图片；选择知识库、Skills 和声明式插件。图片理解取决于模型能力。
+- **日常办公**：生成可编辑 DOCX、PPTX、XLSX，读取与处理 PDF，整理文件，生成和编辑 Markdown。
+- **开发与预览**：单文件 HTML 和多文件 Go / Node.js / Python 项目，右侧文件树、源码编辑、启动/停止、日志和网页预览。运行代码需要本机相应语言环境。
+- **多 Agent 编排**：主模型制定计划或手动指定角色；成员独立模型与上下文，按依赖并行、审阅、有限重试/返工、集成最终代码。提供真实编排画布、暂停调整和恢复。
+- **工作流与知识库**：可视化连线与条件分支，项目文档切片、关键词检索和来源引用。
+- **定时任务与记忆**：本机运行计划、独立会话、偏好和项目经验管理。定时执行需要应用保持运行。
+- **模型接入**：OpenAI-compatible Chat Completions、Anthropic Messages、Gemini GenerateContent；使用自己的 API Key。
+- **Windows 桌宠**：同进程原生像素小猫、低帧率动画和任务事件反馈，无额外模型请求。
+
+## 下载与启动
+
+在 [Releases](https://github.com/qishu321/OpsBuddy/releases) 选择平台，校验文件可见 `SHA256SUMS.txt`。
+
+| 平台 | 下载与要求 |
+| --- | --- |
+| Windows 10/11 x64 | `OpsBuddy.exe` 或 `OpsBuddy-Windows-amd64.zip`；需要 Microsoft Edge WebView2 Runtime |
+| Linux x64 | `OpsBuddy-Linux-amd64.tar.gz`；基于 Ubuntu 24.04 构建，需要 GTK3、WebKit2GTK 4.1、图形桌面和 `xdg-open` |
+
+Windows：解压到可写目录，双击 `OpsBuddy.exe`。应用本身无需 Node.js、Go 或浏览器启动；只有运行生成代码才需要对应工具链。未签名的开发预览版可能触发系统信誉提示。
+
+Ubuntu 24.04 / 兼容系统：
+
+```bash
+sudo apt install libgtk-3-0t64 libwebkit2gtk-4.1-0 xdg-utils
+tar -xzf OpsBuddy-Linux-amd64.tar.gz
+./opsbuddy
 ```
 
-构建脚本生成带程序图标、版本信息和高 DPI manifest 的 Windows amd64 GUI EXE，并将界面资源嵌入程序。启动脚本优先运行现成 EXE，不打开浏览器；需要重建时使用 `scripts/start.ps1 -Rebuild`，重建前先关闭运行中的桌面程序。
+Linux 包不是静态通用二进制，其他发行版需要对应运行库；当前不提供 ARM64、macOS 或 AppImage。`opsbuddy.desktop` 可在将可执行文件加入 PATH 后复制至个人应用菜单目录。
 
-开发启动同样使用桌面程序：`npm run dev` 会重新构建并打开桌面窗口；请先正常退出正在运行的旧窗口。`npm run build` 只编译内嵌界面资源，不启动服务。旧独立网页启动入口已停用。
+首次启动：**设置 → 添加模型 → 填写协议、Base URL、模型 ID 和 API Key → 测试**，返回工作台发送任务。Enter 发送、Shift+Enter 换行。代码和文件成果在右侧预览；ZIP 仅在主动导出项目或分发程序时使用。
 
-## 已实现
+## 多 Agent 示例
 
-- 项目级协作：在主会话从「更多任务选项 → 派发子任务」选择自动规划或手动编辑，成员分别绑定已配置模型、按真实依赖执行、结构化审阅及最多两轮返工。代码候选保留独立目录，集成检测冲突后启动右侧预览；用法见 [项目协作指南](docs/multi-agent-guide.md)。
+在项目内输入「做一个办公待办看板，前端与 Go 后端分工实现，再独立审阅」，从输入框的「更多任务选项 → 派发子任务」进入。可让主模型规划，或指定 worker、researcher、explorer、reviewer 的职责和模型。角色不是另一套专家库。
 
-- 工作流画布：7 类节点、拖动连线、节点配置、保存版本、启停、执行、条件分支、并行、两种汇合策略、取消、运行记录及真实成果。
-- 项目知识库：本机/项目文件导入、切片索引、中文关键词检索、原文与页码来源、重建/移出索引、单任务/角色/工作流引用。
-- 详细操作见 [工作流与知识库使用指南](docs/workflows-knowledge-guide.md)。
+主会话「编排画布」展示实际依赖、成员任务和回执；支持暂停后修改计划再继续。最多6位成员、全局3并发、1层委派，节点最多1次自动重试、最多2轮审阅返工。模型请求会产生所选服务的费用。
 
-- 独立桌面窗口，可缩放、最小化、最大化；记住窗口尺寸；同工作空间重复启动时唤起现有实例。
-- Windows 原生文件选择、另存为、用默认程序打开成果、在 Explorer 定位文件、打开数据目录。
-- 退出时关闭 Go 执行器与数据库；运行任务存在时提示是否停止后退出。
+仓库包含 [办公待办示例源码](demos/multi-agent-todo/project) 和历史项目包，可在「项目 → 导入项目」选择 `demos/multi-agent-todo/todo-demo.opsbuddy-project.json`。导入不重新调用模型或自动执行代码；在右侧点击「本机运行」后预览。详见 [协作指南](docs/multi-agent-guide.md)。
 
-- 工作台、项目、新建任务、任务历史、搜索、归档、取消、重启中断标记。
-- SQLite 事务存储、旧 JSON 一次性迁移；任务冻结角色、技能内容/版本和模型参数，可在任务详情查看。
-- 上传文件、成果内容预览、下载、基于已有成果创建新版本（需要模型）。
-- DOCX / PPTX：生成真正可编辑的 Office 文件；基础文字排版。
-- XLSX：CSV/TSV/单工作表 XLSX 的合并、整行去重、类型保留及表头样式；模型生成数据表。
-- PDF：文本提取、合并、页面范围提取；扫描件明确提示尚不支持 OCR。
-- 文件整理：上传文件按类型分类并打包 ZIP，保留输入文件。
-- 内置与自定义 Markdown Skills、声明式插件技能包；原自定义专家迁移为 Skill，按需参与任务。
-- OpenAI-compatible Chat Completions、Anthropic Messages、Gemini GenerateContent 三类**非流式内容生成适配器**。
-- 模型配置持久化、Windows DPAPI 密钥加密、模型连接测试。
-- MCP Streamable HTTP 初始化和工具发现（无认证服务）；尚不能执行这些工具。
-- 明暗主题、响应式布局、本地来源限制、路径校验、输入大小限制。
+## 从源码构建
 
-- 定时任务与个人记忆操作见 [使用指南](docs/schedules-memory-guide.md)。
+需要 **Go 1.26+、Node.js 22+、npm**；首次安装依赖需要联网。
 
-## 输入与会话
+```bash
+git clone https://github.com/qishu321/OpsBuddy.git
+cd OpsBuddy
+npm ci
+```
 
-输入框底部选择模型、添加材料或调整权限；更多选项中选择文件格式、知识库、记忆和派发子任务；Skills 在添加材料中引用。默认权限允许所选模型处理主动发送的本次内容，可关闭。
+Windows PowerShell：
 
-左侧会话悬停显示删除按钮，顶部也可删除当前会话。确认后删除整段消息与关联子任务，项目文件保留；运行中的任务先停止。
+```powershell
+./scripts/build-desktop.ps1
+# 输出 release/OpsBuddy/OpsBuddy.exe
+# 可选：./scripts/build-desktop.ps1 -Package
+```
 
-## 快速体验
+Linux（Ubuntu 24.04）：
 
-**先连接模型**：在设置添加模型后，工作台默认选中该模型；之后会记住上次选择。模型下拉不再提供“本地整理”，未添加模型时会显示“添加模型”。定时任务、子任务与工作流 Agent 同样使用明确选择的模型。
+```bash
+sudo apt install build-essential pkg-config libgtk-3-dev libwebkit2gtk-4.1-dev
+bash scripts/build-desktop.sh
+# 输出 release/linux/opsbuddy 和 release/OpsBuddy-Linux-amd64.tar.gz
+```
 
-**普通问答**：选中模型，选择“对话问答”或“自动选择”后发送，回复直接显示在会话中。显式选择 Word、PPT、Excel 用于文件任务。
+Linux 必须在 Linux 上构建，使用 CGO、GTK3 和 `webkit2_41` 构建标签。依赖依据 [Wails v2 安装说明](https://v2.wails.io/docs/gettingstarted/installation/)。`npm run build` 只构建嵌入界面，不启动网页服务；`npm run dev` 为 Windows 桌面开发入口。应用没有面向用户的独立 Web 版本。
 
-**使用 AI**：设置 → 添加模型 → 选择接口类型 → 填写 Base URL、模型 ID、API Key → 测试。回到工作台选中该模型，并确认允许发送本次任务内容。所选 Skills 与项目说明会作为模型的工作指导，附件内容会被读取并发送至所选服务。
+## 数据与凭据
 
-模型适配器已通过 mock 协议测试，真实供应商接入需要用户配置有效凭据。不同网关兼容性可能不同；当前未提供自动回退、流式生成或通用工具循环。
+- Windows 默认数据目录：EXE 旁 `.opsbuddy/`。
+- Linux 默认数据目录：`${XDG_CONFIG_HOME:-~/.config}/opsbuddy/`。
+- 两个平台都可用 `--data /绝对路径` 指定目录。退出应用后备份整个数据目录；不要让多个实例同时打开同一数据库。
+- Windows 的模型密钥使用当前用户 DPAPI 加密。
+- Linux 使用 AES-256-GCM，随机用户密钥保存在 `${XDG_CONFIG_HOME:-~/.config}/opsbuddy-credentials/key`，目录0700、密钥0600。它是文件级本地加密，不是硬件密钥库；能读取数据库和该密钥的人可以解密。迁移 Linux 数据时需要一并安全备份该密钥。
+- 跨平台搬迁后重新配置 API Key，Windows 密文不能在 Linux 解密。任务快照不包含 API Key；主动提交的内容和所选附件会发送给选择的模型服务。
+- 个人会话、数据库、缓存、密钥、运行产物不会包含在 GitHub 源码或发行包中。示例包只包含演示记录和源码。
 
-## 开发结构
+## 验证与发布
+
+Windows：`powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test.ps1`。
+
+Linux：`go test -tags webkit2_41 ./...`、`go vet -tags webkit2_41 ./...`、`npm run build`。原生界面验收可运行 `bash scripts/test-linux-desktop.sh`（需已构建及安装 `xvfb dbus-x11`），使用独立目录和虚拟显示，不调用真实模型。
+
+GitHub Actions 对 Windows/Linux 分别测试、构建；推送与版本匹配的 `v*` tag 后，全部通过才发布双平台预览版及 SHA-256 校验。详情见 [发布说明](docs/releases/v0.18.0.md)。
+
+## 边界
+
+Office 当前是基础内容生成和内容预览，不是完整 Office 排版渲染器。知识库使用关键词检索，暂不提供向量检索或 OCR。模型适配器目前为非流式；MCP 支持初始化与工具发现，尚未接入工具执行。未实现通用工具循环、任意自动安装依赖、无限委派、关闭应用后的系统级定时服务，或操作系统级代码沙箱。Linux 暂无原生桌宠。
+
+## 目录
 
 ```text
-cmd/opsbuddy-desktop/  Windows 桌面启动入口与嵌入界面
-cmd/opsbuddy/          旧命令兼容提示（不启动服务）
-internal/desktop/     Wails 生命周期、原生文件操作、窗口与请求桥接
-internal/app/         HTTP API、持久化、任务、模型、文档、MCP、测试
-src/                  React 工作台
-scripts/              Windows 启动与验证脚本
-docs/requirements/    产品需求（23 份 Markdown）
-docs/implementation-status.md  当前范围与后续工作
-release/OpsBuddy/
-  OpsBuddy.exe        可双击的桌面程序
-  .opsbuddy/          桌面用户数据（不进入发行 ZIP）
-  state.db            SQLite 项目、任务、配置与 DPAPI 加密密钥
-  state.json          升级前的旧数据（迁移后原样保留，不再更新）
-  files/              输入副本与生成文件
+cmd/opsbuddy-desktop/  Windows/Linux 桌面入口与嵌入界面
+internal/app/         Go 任务、模型、存储、办公与编排
+internal/desktop/     Wails 原生文件操作与请求桥接
+internal/pet/         Windows 原生桌宠和共享图像资源
+src/                  React / TypeScript 界面
+scripts/              构建、启动和验收脚本
+.github/workflows/    双平台测试、构建和 tag 发布
+docs/                 需求、指南与验证记录
+demos/                示例源码和可导入演示项目
 ```
 
-数据使用纯 Go SQLite 驱动，按实体 ID 保存 JSON 记录，事务提交变更；仍适用于单用户、单进程开发预览。数据库独占锁会拒绝第二个新版实例打开同一目录，关闭时等待任务收尾后释放锁。内存仍加载全量历史，尚未提供分页或大数据量性能承诺。
-
-桌面版默认将项目、任务、模型配置、文件和 WebView2 配置保存在 EXE 旁的 `.opsbuddy`。备份/搬迁程序时保留整个目录；发行 ZIP 只含程序与说明，不打包个人数据。旧浏览器版位于仓库根目录的 `.opsbuddy` 仍保留，不自动迁移。需要打开已有数据时，先关闭占用该目录的旧服务，再使用 `OpsBuddy.exe --data "已有数据目录的绝对路径"`。
-
-**从 JSON 版本升级**：先停止旧版服务，再执行启动脚本重新构建启动。旧版不认识 SQLite 锁，不能与新版共用目录运行。首次启动将 `state.json` 在事务中导入 `state.db`，保持实体 ID、资产相对路径和 DPAPI 密文不变；不改写旧 JSON 或成果文件。导入失败则报错，不用空数据覆盖。成功后只读取 SQLite；保留的 JSON 是迁移时备份，不包含后续任务。不要通过删除数据库来降级，备份时停止服务并复制整个数据目录。本轮开发验证没有启动真实 `.opsbuddy` 的迁移。
-
-任务提交时保存角色内容/哈希、已启用且绑定的 Skill/声明式插件内容与版本/哈希、模型协议/地址/ID、发送授权和实际执行模式。执行器使用该快照；配置编辑、禁用和删除不改变已提交任务。快照不含模型 Key 或其密文，仅含凭据引用；密钥不会复制进历史记录。旧任务明确显示未记录快照，不补造历史；“加载原需求重试”仍按当前配置创建任务，不是检查点续跑或历史密钥重放。
-
-Windows 加密密钥绑定当前系统用户，复制 `state.db`（或旧 `state.json`）到另一台电脑可能无法解密，需重新配置 Key。非 Windows 平台目前不支持保存凭据。
-
-## 验证
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\test.ps1
-```
-
-脚本运行 Go 单元/集成测试、`go vet` 和 TypeScript/Vite 构建。测试覆盖 Office XML/内容往返、表格前导零与公式注入防护、任务持久化、上传与分类打包、请求/项目/目录边界、三类模型解析与错误分支，以及 SQLite 迁移、写失败回滚、跨进程互斥、异常退出恢复、排队配置冻结与重启保留。
-
-额外覆盖原生导入/导出副本、应用数据库覆盖防护及桌面请求来源隔离。桌面 EXE 提供显式的 `--smoke-test --data "隔离测试目录"` 模式，在实际 WebView2 中检查界面、原生绑定、任务生成及成果读取，写入 `smoke-result.json` 后退出。只在隔离测试目录运行此模式；默认启动不创建自检任务。
-
-Office 预览当前是**内容预览**，未接入完整 Office 渲染器，不宣称精确排版验证。工作流已支持多个 Agent 节点分工与并行；动态自动组队、循环/任意代码、失败节点续跑尚未实现。知识库使用本地关键词检索，未实现向量语义检索/OCR。媒体与 MCP 执行仍未接入。
-
-本版会话材料、Word 局部修改与子 Agent 操作见 [会话与协作指南](docs/sessions-agents-guide.md)。用户确认的后续阶段见 [新增需求目录](docs/requirements/README.md#2026-10-15-新增需求与开发顺序)。
-
-### Markdown 与网页开发
-
-0.8.0 起支持用所选模型生成 `.md` 和单文件 `.html`，在桌面右侧预览、编辑源码、复制或保存新版本。首页提供“制作网页”和“Markdown 文档”入口。详情见 [开发与预览指南](docs/development-preview-guide.md)。
-
-0.8.2 增加顶部右侧栏开关（Ctrl+Shift+B）、会话文件列表/搜索、加宽 HTML 预览、可调宽边界和紧凑文件工具栏。见 [侧栏验证记录](docs/verification-0.8.2.md)。
-
-0.8.3：在输入框按 Ctrl+V 粘贴截图，显示缩略图，可点击预览/移除；支持只发图片。识图取决于所选模型的图片输入能力。
-
-0.8.4：工作台统一六个办公/开发入口，侧栏按工作空间与工具分组；选定输出格式会在输入框显示，可一键恢复自动选择。已配置模型时隐藏接入引导，版本信息保留在设置页。见 [界面整理验证](docs/verification-0.8.4.md)。
-
-0.9.0：2048 等开发需求会生成实际网页并自动打开右侧预览；支持 Go、Node.js、Python 的多文件代码项目和本机运行、后端服务预览、源文件编辑及日志。使用本机语言环境，首批使用标准库，不自动安装依赖。见 [开发与预览指南](docs/development-preview-guide.md)。
-
-0.9.1：输入框按 Enter 发送、Shift+Enter 换行，兼容 Ctrl+Enter；输入法选词回车和长按重复回车不会误发送。
-
-0.10.0：内置 12 项办公、开发与通用 Skills，支持按需选择、搜索、说明查看、停用及复制定制；任务显示实际读取记录。见 [内置技能指南](docs/builtin-skills-guide.md)。
-
-0.11.0：取消独立专家库及角色选择，统一使用 Skills；已有自定义专家说明及关联配置迁移保留。项目卡片可编辑项目说明与偏好，新任务保存当时快照；多 Agent 分工继续保留。见 [统一工作方式](docs/unified-skills-guide.md)。
-
-0.12.0：左侧按项目分组展示会话，支持折叠、搜索与项目内新建；切换项目清空当前草稿和引用，文件与预览跟随当前项目。修复异步上传等操作完成后覆盖新项目界面的问题；新增模型请求上下文隔离与跨项目删除边界测试。
-
-0.13.0：内置原创像素桌宠，使用同进程 Go 原生透明窗口，任务事件驱动，空闲时停止重绘。可拖动、双击返回、右键隐藏，在设置中控制动画、置顶与显示。见 [桌宠指南](docs/desktop-pet-guide.md)。
-
-0.14.0：桌宠加入工作阶段、摸摸、悬停和拖动反馈；工作时约 6 帧/秒，空闲停绘。代码成果改为源码目录与文件树，打开服务项目自动运行；内置离线 Vue 3，页面错误可见，ZIP 仅用于主动导出。
-
-0.15.0：桌宠大字号与显示缩放适配、空闲呼吸/眨眼/伸懒腰、窗口内探头和底部快捷操作条；活跃模式空闲约 2 帧/秒，可一键静止。
-
-0.15.1：恢复轻巧的宠物比例，圆角紧凑气泡、平滑字体与单行提示，操作条改为悬停图标，保留低帧率待机动作。
+问题或建议请提交到 [Issues](https://github.com/qishu321/OpsBuddy/issues)，附平台、版本和已脱敏的复现步骤；请勿上传 API Key、个人数据库或敏感附件。

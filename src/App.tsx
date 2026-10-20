@@ -79,6 +79,7 @@ import MarkdownContent from './MarkdownContent';
 import ArtifactSidebar from './ArtifactSidebar';
 import ProjectSessions from './ProjectSessions';
 import DesktopPetSettings from './DesktopPetSettings';
+import { version as appVersion } from '../package.json';
 const WorkflowPage = lazy(() => import('./WorkflowPage'));
 const KnowledgePage = lazy(() => import('./KnowledgePage'));
 const MemoryPage = lazy(() => import('./MemoryPage'));
@@ -218,6 +219,7 @@ function Empty({
 }
 
 export default function App() {
+  const [nativePlatform, setNativePlatform] = useState('');
   const [state, setState] = useState<State>(blank),
     [page, setPage] = useState<Page>('workspace'),
     [projectId, setProjectId] = useState('inbox'),
@@ -321,7 +323,10 @@ export default function App() {
   useEffect(() => {
     const native = desktop();
     (native ? native.Ready() : Promise.resolve())
-      .then(refresh)
+      .then(async () => {
+        if (native) setNativePlatform((await native.Info()).platform || 'windows');
+        await refresh();
+      })
       .then(async () => {
         if (native && (await native.Info()).smokeTest === 'true') {
           const { runDesktopSmoke } = await import('./desktop-smoke');
@@ -2125,7 +2130,7 @@ export default function App() {
                               <span className="key-status">
                                 <ShieldCheck size={12} />
                                 {m.hasKey
-                                  ? '密钥已由 Windows 加密保存'
+                                  ? '密钥已在本机加密保存'
                                   : '未配置密钥 · 适用于无需认证的本地服务'}
                                 {m.testedAt ? ' · 文本测试已通过' : ''}
                               </span>
@@ -2190,7 +2195,15 @@ export default function App() {
                     <div className="section-heading">
                       <h3>工作空间</h3>
                     </div>
-                    {isDesktop() && <DesktopPetSettings />}
+                    {isDesktop() && nativePlatform !== 'linux' && <DesktopPetSettings />}
+                    {nativePlatform === 'linux' && (
+                      <div className="setting-row">
+                        <div>
+                          <strong>桌面小搭子</strong>
+                          <p>原生桌宠暂仅支持 Windows；Linux 不创建桌宠进程或定时器。</p>
+                        </div>
+                      </div>
+                    )}
                     <div className="setting-row">
                       <div>
                         <strong>外观</strong>
@@ -2206,7 +2219,9 @@ export default function App() {
                         <strong>本地数据与文件</strong>
                         <p>
                           {isDesktop()
-                            ? '数据保存在桌面程序旁的 .opsbuddy 文件夹。'
+                            ? nativePlatform === 'linux'
+                              ? '数据默认保存在用户配置目录的 opsbuddy 文件夹。'
+                              : '数据保存在桌面程序旁的 .opsbuddy 文件夹。'
                             : '开发数据保存在启动目录下的 .opsbuddy。'}
                           原文件保留，成果另存。
                         </p>
@@ -2229,7 +2244,7 @@ export default function App() {
                         <p>基础办公文件生成与处理。内容预览不等同于 Office 排版渲染。</p>
                       </div>
                       <span className="small-pill">
-                        {isDesktop() ? '0.15.1 / Windows 桌面' : '0.15.1 / Go'}
+                        {`${appVersion} / ${nativePlatform === 'linux' ? 'Linux' : 'Windows'} 桌面`}
                       </span>
                     </div>
                   </div>
@@ -2424,7 +2439,10 @@ export default function App() {
                           editing?.hasKey ? '留空保留已保存的密钥' : '本地服务无需认证时可留空'
                         }
                       />
-                      <small>密钥仅保存在本机，使用 Windows DPAPI 加密。</small>
+                      <small>
+                        密钥仅保存在本机：Windows 使用 DPAPI，Linux 使用用户独立密钥进行 AES-GCM
+                        加密。
+                      </small>
                     </label>
                     <div className="form-note">
                       此版本实现非流式内容生成。连接测试只验证文本与 JSON

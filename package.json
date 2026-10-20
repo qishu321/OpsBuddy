@@ -1,7 +1,7 @@
 {
   "name": "opsbuddy",
   "private": true,
-  "version": "0.17.1",
+  "version": "0.18.0",
   "type": "module",
   "scripts": {
     "dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start.ps1 -Rebuild",
