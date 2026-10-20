@@ -1,0 +1,20 @@
+{
+  "assetId": "246f4134b5605438ca359899",
+  "at": "2026-10-20T02:44:08.2677545Z",
+  "checks": [
+    "GET /api/health -\u003e 200",
+    "GET / -\u003e 200",
+    "GET /api/todos -\u003e 200",
+    "POST /api/todos -\u003e 201",
+    "PATCH /api/todos/1 -\u003e 200",
+    "GET /api/todos -\u003e 200",
+    "POST /api/todos -\u003e 400",
+    "POST /api/todos -\u003e 400",
+    "PATCH /api/todos/999999999 -\u003e 404"
+  ],
+  "groupId": "3ef9f874420ff30c87055c0f",
+  "model": "deepseek-flash",
+  "passed": true,
+  "project": "demos\\multi-agent-todo\\runs\\20261020-103853\\project",
+  "realModels": true
+}

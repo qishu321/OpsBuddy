@@ -1,0 +1,982 @@
+{
+  "schemaVersion": 1,
+  "id": "todo-demo-20261020-103853",
+  "project": {
+    "id": "demo-todo",
+    "name": "多 Agent Demo · 办公待办",
+    "description": "真实 DeepSeek 协作：前端与 Go 后端并行开发、独立审阅、主任务集成；9 项接口和8项页面检查已通过。",
+    "createdAt": "2026-10-20T02:38:53Z"
+  },
+  "entryTaskId": "c67ca2c3929e20a4f01ad3f7",
+  "tasks": [
+    {
+      "conversationId": "c67ca2c3929e20a4f01ad3f7",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "usedSkillIds": [
+        "builtin-skill-backend-development"
+      ],
+      "configSnapshot": {
+        "agentStage": "integrate",
+        "agentCandidateIds": [
+          "8a4e56b39677732513667d3d",
+          "bcf7a3a1064ff8cb2b4eb677"
+        ],
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "code",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "",
+          "kind": "",
+          "skillIds": [
+            "builtin-skill-backend-development"
+          ],
+          "builtin": false
+        },
+        "roleHash": "35406d59f62847e17d3c11fe7588f9d938f8898905cc7fa901f3f6495bb03494",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": [
+          {
+            "builtin": true,
+            "category": "开发",
+            "id": "builtin-skill-backend-development",
+            "name": "后端与脚本开发",
+            "kind": "skill",
+            "description": "开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。",
+            "content": "---\nname: backend-development\ndescription: 开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。\nmetadata:\n  display_name: 后端与脚本开发\n  category: 开发\n  kinds: code\n---\n# 后端与脚本开发\n\n遵守当前代码项目 JSON 交付结构，选择用户指定语言；未指定后端语言时优先 Go。提供完整入口和实际依赖文件，不把多个文件拼在一个代码围栏内。HTTP 服务用 server 模式，命令行脚本用 command 模式。\n\n使用标准库，不自动安装依赖或生成任意 shell 启动命令。服务读取 PORT 环境变量，只监听 127.0.0.1；GET / 返回可访问主页或 JSON 说明。前端文件与接口由同一服务提供，fetch、资源与表单使用 ./api 等相对路径。\n\n要求 Vue 时，用宿主内置的 Vue 3 全局构建 `./__opsbuddy_runtime__/vue.global.prod.js` 或 ESM 构建 `./__opsbuddy_runtime__/vue.esm-browser.prod.js`，不要引用 CDN 或重复生成运行库。使用 HTML 与 createApp，无需额外安装；不要生成尚无构建环境的 .vue 空壳。分别要求多个版本时，每个实现都有实际入口与使用说明。\n\n校验输入、限制请求体，错误返回适当状态码与清晰信息。文件操作仅针对任务所需的项目数据，不读取无关个人文件或模型凭据。日志记录运行状态，避免输出密钥。\n\nGo 提供 go.mod，Node 模块类型与入口一致，Python 文件按 UTF-8 编写。清楚区分源码生成、进程启动和服务就绪；没有运行证据时不能声称已成功启动。技能不代替运行器，也不增加依赖安装或终端权限。\n",
+            "enabled": true,
+            "version": "1.0.0",
+            "status": "内置 · 按需使用",
+            "contentHash": "8f0f789ca9fda33ff4d7b16023e8f315a5aef89cb7251934fa95b757ace73fca"
+          }
+        ]
+      },
+      "id": "c67ca2c3929e20a4f01ad3f7",
+      "projectId": "demo-todo",
+      "title": "办公待办看板 · 多 Agent 演示",
+      "prompt": "后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。",
+      "kind": "code",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "succeeded",
+      "inputIds": [
+        "8a4e56b39677732513667d3d",
+        "bcf7a3a1064ff8cb2b4eb677"
+      ],
+      "outputIds": [
+        "246f4134b5605438ca359899"
+      ],
+      "steps": [
+        {
+          "name": "协作计划",
+          "status": "running",
+          "detail": "校验依赖、独立模型与输入快照；仅上游成功后派发",
+          "at": "2026-10-20T02:38:53Z"
+        },
+        {
+          "name": "汇总子任务",
+          "status": "running",
+          "detail": "只读取最终有效交付，保留所有历史版本",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "2 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "选择所需技能",
+          "status": "completed",
+          "detail": "按需读取：后端与脚本开发",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "模型接口响应",
+          "status": "completed",
+          "detail": "POST https://api.deepseek.com/chat/completions · HTTP 200 · 请求模型：deepseek-flash · 返回模型：deepseek-flash",
+          "at": "2026-10-20T02:44:06Z"
+        },
+        {
+          "name": "保存代码项目",
+          "status": "completed",
+          "detail": "3 个文件 · go",
+          "at": "2026-10-20T02:44:06Z"
+        },
+        {
+          "name": "启动项目预览",
+          "status": "running",
+          "detail": "正在准备本机进程与预览服务",
+          "at": "2026-10-20T02:44:06Z"
+        },
+        {
+          "name": "启动项目预览",
+          "status": "completed",
+          "detail": "服务已就绪；页面与接口可在右侧查看",
+          "at": "2026-10-20T02:44:07Z"
+        }
+      ],
+      "result": "源码项目已保存，服务已启动。右侧可直接预览、查看文件树和运行日志；需要打包时再导出 ZIP。",
+      "createdAt": "2026-10-20T02:38:53Z",
+      "updatedAt": "2026-10-20T02:44:07Z",
+      "archived": false
+    },
+    {
+      "conversationId": "2fdd0f44eacb6028d1d7e751",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "agentMemberId": "__planner",
+      "usedSkillIds": [
+        "builtin-skill-backend-development"
+      ],
+      "configSnapshot": {
+        "agentStage": "plan",
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "chat",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "",
+          "kind": "",
+          "skillIds": [
+            "builtin-skill-backend-development"
+          ],
+          "builtin": false
+        },
+        "roleHash": "35406d59f62847e17d3c11fe7588f9d938f8898905cc7fa901f3f6495bb03494",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": [
+          {
+            "builtin": true,
+            "category": "开发",
+            "id": "builtin-skill-backend-development",
+            "name": "后端与脚本开发",
+            "kind": "skill",
+            "description": "开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。",
+            "content": "---\nname: backend-development\ndescription: 开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。\nmetadata:\n  display_name: 后端与脚本开发\n  category: 开发\n  kinds: code\n---\n# 后端与脚本开发\n\n遵守当前代码项目 JSON 交付结构，选择用户指定语言；未指定后端语言时优先 Go。提供完整入口和实际依赖文件，不把多个文件拼在一个代码围栏内。HTTP 服务用 server 模式，命令行脚本用 command 模式。\n\n使用标准库，不自动安装依赖或生成任意 shell 启动命令。服务读取 PORT 环境变量，只监听 127.0.0.1；GET / 返回可访问主页或 JSON 说明。前端文件与接口由同一服务提供，fetch、资源与表单使用 ./api 等相对路径。\n\n要求 Vue 时，用宿主内置的 Vue 3 全局构建 `./__opsbuddy_runtime__/vue.global.prod.js` 或 ESM 构建 `./__opsbuddy_runtime__/vue.esm-browser.prod.js`，不要引用 CDN 或重复生成运行库。使用 HTML 与 createApp，无需额外安装；不要生成尚无构建环境的 .vue 空壳。分别要求多个版本时，每个实现都有实际入口与使用说明。\n\n校验输入、限制请求体，错误返回适当状态码与清晰信息。文件操作仅针对任务所需的项目数据，不读取无关个人文件或模型凭据。日志记录运行状态，避免输出密钥。\n\nGo 提供 go.mod，Node 模块类型与入口一致，Python 文件按 UTF-8 编写。清楚区分源码生成、进程启动和服务就绪；没有运行证据时不能声称已成功启动。技能不代替运行器，也不增加依赖安装或终端权限。\n",
+            "enabled": true,
+            "version": "1.0.0",
+            "status": "内置 · 按需使用",
+            "contentHash": "8f0f789ca9fda33ff4d7b16023e8f315a5aef89cb7251934fa95b757ace73fca"
+          }
+        ]
+      },
+      "id": "2fdd0f44eacb6028d1d7e751",
+      "projectId": "demo-todo",
+      "title": "制定协作计划",
+      "prompt": "后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。\n本次可用配置：{\"inputIds\":null,\"models\":[{\"id\":\"271f2936452ae74a23cab3bc\",\"modelId\":\"deepseek-flash\",\"name\":\"deepseek\"}],\"outputKind\":\"code\",\"skills\":[{\"id\":\"builtin-skill-backend-development\",\"name\":\"后端与脚本开发\"}]}",
+      "kind": "chat",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "succeeded",
+      "inputIds": [],
+      "outputIds": [],
+      "steps": [
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "0 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:38:53Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:38:53Z"
+        },
+        {
+          "name": "选择所需技能",
+          "status": "completed",
+          "detail": "按需读取：后端与脚本开发",
+          "at": "2026-10-20T02:38:53Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:38:53Z"
+        },
+        {
+          "name": "模型接口响应",
+          "status": "completed",
+          "detail": "POST https://api.deepseek.com/chat/completions · HTTP 200 · 请求模型：deepseek-flash · 返回模型：deepseek-flash",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "completed",
+          "detail": "已收到模型回复",
+          "at": "2026-10-20T02:39:07Z"
+        }
+      ],
+      "result": "{\"summary\":\"规划3个成员：front 与 back 并行开发，front 仅交付 index.html，back 仅交付 main.go 与 go.mod；review 作为唯一终端审阅者依赖两者，做静态契约、源码、安全和错误路径审阅并明确未执行测试。审阅通过后由主任务原样集成，最终 mode=server、runtime=go、entry=main.go，并在后台启动。\",\"members\":[{\"id\":\"front\",\"role\":\"worker\",\"name\":\"前端看板\",\"prompt\":\"仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。\",\"modelId\":\"271f2936452ae74a23cab3bc\",\"kind\":\"code\",\"dependsOn\":[],\"inputIds\":[],\"skillIds\":[],\"ownedPaths\":[\"index.html\"],\"acceptance\":\"index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。\",\"failurePolicy\":\"block_dependents\"},{\"id\":\"back\",\"role\":\"worker\",\"name\":\"Go 后端\",\"prompt\":\"仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\\\"ok\\\":true}；GET ./api/todos -\u003e 200 {\\\"items\\\":[{\\\"id\\\":1,\\\"title\\\":\\\"待办标题\\\",\\\"done\\\":false}]}；POST ./api/todos 接收 {\\\"title\\\":\\\"字符串\\\"} -\u003e 201 {\\\"item\\\":{\\\"id\\\":递增整数,\\\"title\\\":\\\"去首尾空白后的标题\\\",\\\"done\\\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\\\"done\\\":true或false} -\u003e 200 {\\\"item\\\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。\",\"modelId\":\"271f2936452ae74a23cab3bc\",\"kind\":\"code\",\"dependsOn\":[],\"inputIds\":[],\"skillIds\":[\"builtin-skill-backend-development\"],\"ownedPaths\":[\"main.go\",\"go.mod\"],\"acceptance\":\"main.go 与 go.mod 完整且仅使用标准库；所有路由、方法、状态码和 JSON 结构符合契约；标题去首尾空白、空白与超过120个 Unicode 字符校验正确；绑定 127.0.0.1，PORT 默认18086；GET / 返回 index.html；data/todos.json 首次为空并持久化，mutex 保护读写；PATCH 不存在 ID 返回404；保存失败返回明确500；非法 JSON/请求体超限等返回清晰错误；不修改前端文件。\",\"failurePolicy\":\"block_dependents\"},{\"id\":\"review\",\"role\":\"reviewer\",\"name\":\"静态审阅\",\"prompt\":\"静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。\",\"modelId\":\"271f2936452ae74a23cab3bc\",\"kind\":\"chat\",\"dependsOn\":[\"front\",\"back\"],\"inputIds\":[],\"skillIds\":[],\"ownedPaths\":[],\"acceptance\":\"产出静态审阅结论并覆盖全部验收项；明确“尚未执行测试”及动态接口测试待集成后由外层执行；无具体问题时通过，有具体问题时仅标记 front/back rework 并说明原因；不修改文件，不虚构运行或测试结果；确认前后端文件职责不重叠。\",\"failurePolicy\":\"block_dependents\"}]}",
+      "createdAt": "2026-10-20T02:38:53Z",
+      "updatedAt": "2026-10-20T02:39:07Z",
+      "archived": false
+    },
+    {
+      "conversationId": "b07af1f378894c64dfad0416",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "agentMemberId": "front",
+      "configSnapshot": {
+        "agentStage": "candidate",
+        "ownedPaths": [
+          "index.html"
+        ],
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "code",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "\n子 Agent 职责：根据自己的任务要求和明确提供的材料制作交付内容，保留关键事实和数字。",
+          "kind": "",
+          "skillIds": null,
+          "builtin": false
+        },
+        "roleHash": "6982600e3cbe262693d424c560f4c63bb6f2f7bd31843cadb3eeb68fec562191",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": null
+      },
+      "id": "b07af1f378894c64dfad0416",
+      "projectId": "demo-todo",
+      "title": "前端看板",
+      "prompt": "主任务目标：后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。\n当前职责：仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。\n验收条件：index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。",
+      "kind": "code",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "failed",
+      "inputIds": [],
+      "outputIds": [],
+      "steps": [
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "0 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:39:07Z"
+        }
+      ],
+      "result": "",
+      "error": "context deadline exceeded (Client.Timeout or context cancellation while reading body)",
+      "createdAt": "2026-10-20T02:39:07Z",
+      "updatedAt": "2026-10-20T02:41:07Z",
+      "archived": false
+    },
+    {
+      "conversationId": "016dc38310f4da93c74acab7",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "agentMemberId": "back",
+      "usedSkillIds": [
+        "builtin-skill-backend-development"
+      ],
+      "configSnapshot": {
+        "agentStage": "candidate",
+        "ownedPaths": [
+          "main.go",
+          "go.mod"
+        ],
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "code",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "\n子 Agent 职责：根据自己的任务要求和明确提供的材料制作交付内容，保留关键事实和数字。",
+          "kind": "",
+          "skillIds": [
+            "builtin-skill-backend-development"
+          ],
+          "builtin": false
+        },
+        "roleHash": "b84f4bec3fab02951eead44647b3792f927ff5a0701b701aab02ba5ef0a99eb0",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": [
+          {
+            "builtin": true,
+            "category": "开发",
+            "id": "builtin-skill-backend-development",
+            "name": "后端与脚本开发",
+            "kind": "skill",
+            "description": "开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。",
+            "content": "---\nname: backend-development\ndescription: 开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。\nmetadata:\n  display_name: 后端与脚本开发\n  category: 开发\n  kinds: code\n---\n# 后端与脚本开发\n\n遵守当前代码项目 JSON 交付结构，选择用户指定语言；未指定后端语言时优先 Go。提供完整入口和实际依赖文件，不把多个文件拼在一个代码围栏内。HTTP 服务用 server 模式，命令行脚本用 command 模式。\n\n使用标准库，不自动安装依赖或生成任意 shell 启动命令。服务读取 PORT 环境变量，只监听 127.0.0.1；GET / 返回可访问主页或 JSON 说明。前端文件与接口由同一服务提供，fetch、资源与表单使用 ./api 等相对路径。\n\n要求 Vue 时，用宿主内置的 Vue 3 全局构建 `./__opsbuddy_runtime__/vue.global.prod.js` 或 ESM 构建 `./__opsbuddy_runtime__/vue.esm-browser.prod.js`，不要引用 CDN 或重复生成运行库。使用 HTML 与 createApp，无需额外安装；不要生成尚无构建环境的 .vue 空壳。分别要求多个版本时，每个实现都有实际入口与使用说明。\n\n校验输入、限制请求体，错误返回适当状态码与清晰信息。文件操作仅针对任务所需的项目数据，不读取无关个人文件或模型凭据。日志记录运行状态，避免输出密钥。\n\nGo 提供 go.mod，Node 模块类型与入口一致，Python 文件按 UTF-8 编写。清楚区分源码生成、进程启动和服务就绪；没有运行证据时不能声称已成功启动。技能不代替运行器，也不增加依赖安装或终端权限。\n",
+            "enabled": true,
+            "version": "1.0.0",
+            "status": "内置 · 按需使用",
+            "contentHash": "8f0f789ca9fda33ff4d7b16023e8f315a5aef89cb7251934fa95b757ace73fca"
+          }
+        ]
+      },
+      "id": "016dc38310f4da93c74acab7",
+      "projectId": "demo-todo",
+      "title": "Go 后端",
+      "prompt": "主任务目标：后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。\n当前职责：仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\"ok\":true}；GET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}；POST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。\n验收条件：main.go 与 go.mod 完整且仅使用标准库；所有路由、方法、状态码和 JSON 结构符合契约；标题去首尾空白、空白与超过120个 Unicode 字符校验正确；绑定 127.0.0.1，PORT 默认18086；GET / 返回 index.html；data/todos.json 首次为空并持久化，mutex 保护读写；PATCH 不存在 ID 返回404；保存失败返回明确500；非法 JSON/请求体超限等返回清晰错误；不修改前端文件。",
+      "kind": "code",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "succeeded",
+      "inputIds": [],
+      "outputIds": [
+        "bcf7a3a1064ff8cb2b4eb677"
+      ],
+      "steps": [
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "0 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "选择所需技能",
+          "status": "completed",
+          "detail": "按需读取：后端与脚本开发",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:39:07Z"
+        },
+        {
+          "name": "模型接口响应",
+          "status": "completed",
+          "detail": "POST https://api.deepseek.com/chat/completions · HTTP 200 · 请求模型：deepseek-flash · 返回模型：deepseek-flash",
+          "at": "2026-10-20T02:40:21Z"
+        },
+        {
+          "name": "保存代码项目",
+          "status": "completed",
+          "detail": "2 个文件 · go",
+          "at": "2026-10-20T02:40:21Z"
+        }
+      ],
+      "result": "候选源码已保存，等待依赖审阅和主任务集成；尚未启动。文件：main.go, go.mod",
+      "createdAt": "2026-10-20T02:39:07Z",
+      "updatedAt": "2026-10-20T02:40:21Z",
+      "archived": false
+    },
+    {
+      "conversationId": "b07af1f378894c64dfad0416",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "agentMemberId": "front",
+      "configSnapshot": {
+        "agentStage": "candidate",
+        "ownedPaths": [
+          "index.html"
+        ],
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "code",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "\n子 Agent 职责：根据自己的任务要求和明确提供的材料制作交付内容，保留关键事实和数字。",
+          "kind": "",
+          "skillIds": null,
+          "builtin": false
+        },
+        "roleHash": "6982600e3cbe262693d424c560f4c63bb6f2f7bd31843cadb3eeb68fec562191",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": null
+      },
+      "id": "fed5a37fa60a91607eeeb8b7",
+      "projectId": "demo-todo",
+      "title": "前端看板",
+      "prompt": "主任务目标：后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。\n当前职责：仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。\n上一轮失败：context deadline exceeded (Client.Timeout or context cancellation while reading body)\n仅重试本节点，仍按原验收条件交付。\n验收条件：index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。",
+      "kind": "code",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "succeeded",
+      "inputIds": [],
+      "outputIds": [
+        "8a4e56b39677732513667d3d"
+      ],
+      "steps": [
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "0 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:41:07Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:41:07Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:41:07Z"
+        },
+        {
+          "name": "模型接口响应",
+          "status": "completed",
+          "detail": "POST https://api.deepseek.com/chat/completions · HTTP 200 · 请求模型：deepseek-flash · 返回模型：deepseek-flash",
+          "at": "2026-10-20T02:42:26Z"
+        },
+        {
+          "name": "保存代码项目",
+          "status": "completed",
+          "detail": "1 个文件 · go",
+          "at": "2026-10-20T02:42:26Z"
+        }
+      ],
+      "result": "候选源码已保存，等待依赖审阅和主任务集成；尚未启动。文件：index.html",
+      "createdAt": "2026-10-20T02:41:07Z",
+      "updatedAt": "2026-10-20T02:42:26Z",
+      "archived": false
+    },
+    {
+      "conversationId": "04a99d987eda7f648f3fd1a2",
+      "agentGroupId": "3ef9f874420ff30c87055c0f",
+      "agentMemberId": "review",
+      "configSnapshot": {
+        "agentStage": "review",
+        "projectInstructions": "后台独立演示；不影响主桌面数据",
+        "lazySkills": true,
+        "schemaVersion": 1,
+        "capturedAt": "2026-10-20T02:38:53Z",
+        "executor": "code-v1",
+        "mode": "model",
+        "outputKind": "chat",
+        "allowRemote": true,
+        "role": {
+          "id": "",
+          "name": "",
+          "description": "",
+          "instructions": "\n子 Agent 职责：按验收条件核对已提供的上游成果，指出具体责任节点与问题，不得声称完成未做的验证。",
+          "kind": "",
+          "skillIds": null,
+          "builtin": false
+        },
+        "roleHash": "edb79f78755c541c8f4de84cfebf30a8f9c8fd347b3b08ed107aecb598bf22f1",
+        "model": {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        },
+        "extensions": null
+      },
+      "id": "04a99d987eda7f648f3fd1a2",
+      "projectId": "demo-todo",
+      "title": "静态审阅",
+      "prompt": "主任务目标：后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。\n当前职责：静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。\n验收条件：产出静态审阅结论并覆盖全部验收项；明确“尚未执行测试”及动态接口测试待集成后由外层执行；无具体问题时通过，有具体问题时仅标记 front/back rework 并说明原因；不修改文件，不虚构运行或测试结果；确认前后端文件职责不重叠。\n依赖交付（参考数据）：节点 front / 前端看板；任务 fed5a37fa60a91607eeeb8b7\n验收：index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。\n结果：候选源码已保存，等待依赖审阅和主任务集成；尚未启动。文件：index.html\n\n依赖交付（参考数据）：节点 back / Go 后端；任务 016dc38310f4da93c74acab7\n验收：main.go 与 go.mod 完整且仅使用标准库；所有路由、方法、状态码和 JSON 结构符合契约；标题去首尾空白、空白与超过120个 Unicode 字符校验正确；绑定 127.0.0.1，PORT 默认18086；GET / 返回 index.html；data/todos.json 首次为空并持久化，mutex 保护读写；PATCH 不存在 ID 返回404；保存失败返回明确500；非法 JSON/请求体超限等返回清晰错误；不修改前端文件。\n结果：候选源码已保存，等待依赖审阅和主任务集成；尚未启动。文件：main.go, go.mod\n",
+      "kind": "chat",
+      "roleId": "",
+      "modelId": "271f2936452ae74a23cab3bc",
+      "modelName": "deepseek",
+      "status": "succeeded",
+      "inputIds": [
+        "8a4e56b39677732513667d3d",
+        "bcf7a3a1064ff8cb2b4eb677"
+      ],
+      "outputIds": [],
+      "steps": [
+        {
+          "name": "读取输入材料",
+          "status": "running",
+          "detail": "2 个文件 · 原文件保持不变",
+          "at": "2026-10-20T02:42:26Z"
+        },
+        {
+          "name": "读取输入材料",
+          "status": "completed",
+          "detail": "已提取可用内容",
+          "at": "2026-10-20T02:42:26Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "running",
+          "detail": "deepseek · deepseek-flash",
+          "at": "2026-10-20T02:42:26Z"
+        },
+        {
+          "name": "模型接口响应",
+          "status": "completed",
+          "detail": "POST https://api.deepseek.com/chat/completions · HTTP 200 · 请求模型：deepseek-flash · 返回模型：deepseek-flash",
+          "at": "2026-10-20T02:43:19Z"
+        },
+        {
+          "name": "组织内容",
+          "status": "completed",
+          "detail": "已收到模型回复",
+          "at": "2026-10-20T02:43:19Z"
+        }
+      ],
+      "result": "{\"status\":\"pass\",\"summary\":\"静态审阅通过：front 的 index.html 为独立单文件，内联 CSS/JS，无 CDN、外部图标/字体、localStorage 或假数据；仅使用 ./api/... 相对接口读写，具备加载失败重试、防重复提交、真实错误提示，标题以 textContent 安全渲染，无删除功能。back 的 main.go、go.mod 仅使用标准库且模块/版本符合要求；健康检查、列表、创建、更新路由与固定 JSON 契约、201/200/400/404/500 错误路径、标题去首尾空白与 120 个 Unicode 字符限制、127.0.0.1 绑定、PORT 默认 18086、GET / 返回 index.html、data/todos.json 持久化及 mutex 保护均已静态核对。前后端文件职责不重叠。尚未执行测试或编译；动态接口测试待集成后由外层程序执行。\",\"issues\":[]}",
+      "createdAt": "2026-10-20T02:42:26Z",
+      "updatedAt": "2026-10-20T02:43:19Z",
+      "archived": false
+    }
+  ],
+  "agentGroups": [
+    {
+      "id": "3ef9f874420ff30c87055c0f",
+      "projectId": "demo-todo",
+      "rootTaskId": "c67ca2c3929e20a4f01ad3f7",
+      "prompt": "后台开发一个轻量的中文办公待办看板 Demo，实际前端 + Go 后端，不打开浏览器或桌面窗口。\n只规划3位成员：front（worker，无依赖，kind=code，仅负责index.html），back（worker，无依赖，kind=code，仅负责main.go、go.mod），review（reviewer，依赖front和back）。前后端并行，审阅后主任务集成并在后台启动。没有明确资料，不引用历史会话。所有成员沿用当前主模型。不要生成ZIP、Word、额外部门或设计方案节点。\n\n固定接口契约：\nGET ./api/health -\u003e 200 {\"ok\":true}\nGET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}\nPOST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}。\n空白标题或超过120个Unicode字符 -\u003e 400 JSON错误；只接受JSON，使用标准库，不用外部依赖。\nPATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}；不存在的ID -\u003e 404。\nGET / 提供index.html。Go绑定127.0.0.1，从PORT环境变量读取端口，默认18086。go.mod使用module opsbuddy-todo-demo、go 1.22。\n持久化到当前源码目录下data/todos.json，首次为空列表，服务器重启保留数据。使用mutex保护读写，保存失败返回明确500，不伪装成功。\n\n前端：独立单文件index.html，内联CSS/JS，零CDN、零外部图标/字体和依赖。现代清晰办公风：背景#F6F8FC，白色卡片，主色#4361D8，文字#26334A，完成色#27886D。Segoe UI/Microsoft YaHei，正文16px，标题28px，辅助14px。包括标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误。所有待办数据从后端读取和保存，不能用localStorage或假数据代替API；用户标题必须用textContent等安全方式显示。接口均用./api/...相对URL，加载失败可重试，防止重复提交。不要做删除功能。\n\n审阅阶段只做接口契约、源码、安全和错误路径的静态审阅，明确说明尚未执行测试；动态接口测试会在集成后由外层程序执行，不因本阶段不能运行而直接blocked。仅当代码有具体问题时rework并指明front/back。前后端文件职责不得重叠。\n主任务最终mode=server，runtime=go，entry=main.go，原样集成已审阅的候选源码，自动在后台启动，不输出启动教程代替真实项目。",
+      "status": "succeeded",
+      "members": [
+        {
+          "id": "front",
+          "role": "worker",
+          "name": "前端看板",
+          "prompt": "仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。",
+          "acceptance": "index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。",
+          "status": "succeeded",
+          "error": "context deadline exceeded (Client.Timeout or context cancellation while reading body)",
+          "taskIds": [
+            "b07af1f378894c64dfad0416",
+            "fed5a37fa60a91607eeeb8b7"
+          ],
+          "pending": null,
+          "instructions": [
+            "仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。"
+          ],
+          "configSnapshot": {
+            "agentStage": "candidate",
+            "ownedPaths": [
+              "index.html"
+            ],
+            "projectInstructions": "后台独立演示；不影响主桌面数据",
+            "lazySkills": true,
+            "schemaVersion": 1,
+            "capturedAt": "2026-10-20T02:38:53Z",
+            "executor": "code-v1",
+            "mode": "model",
+            "outputKind": "code",
+            "allowRemote": true,
+            "role": {
+              "id": "",
+              "name": "",
+              "description": "",
+              "instructions": "\n子 Agent 职责：根据自己的任务要求和明确提供的材料制作交付内容，保留关键事实和数字。",
+              "kind": "",
+              "skillIds": null,
+              "builtin": false
+            },
+            "roleHash": "6982600e3cbe262693d424c560f4c63bb6f2f7bd31843cadb3eeb68fec562191",
+            "model": {
+              "id": "271f2936452ae74a23cab3bc",
+              "name": "deepseek",
+              "family": "openai",
+              "baseUrl": "https://api.deepseek.com",
+              "modelId": "deepseek-flash",
+              "credentialRef": "271f2936452ae74a23cab3bc"
+            },
+            "extensions": null
+          },
+          "processedTaskId": "fed5a37fa60a91607eeeb8b7",
+          "retries": 1,
+          "currentPrompt": "仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。\n上一轮失败：context deadline exceeded (Client.Timeout or context cancellation while reading body)\n仅重试本节点，仍按原验收条件交付。"
+        },
+        {
+          "id": "back",
+          "role": "worker",
+          "name": "Go 后端",
+          "prompt": "仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\"ok\":true}；GET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}；POST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。",
+          "acceptance": "main.go 与 go.mod 完整且仅使用标准库；所有路由、方法、状态码和 JSON 结构符合契约；标题去首尾空白、空白与超过120个 Unicode 字符校验正确；绑定 127.0.0.1，PORT 默认18086；GET / 返回 index.html；data/todos.json 首次为空并持久化，mutex 保护读写；PATCH 不存在 ID 返回404；保存失败返回明确500；非法 JSON/请求体超限等返回清晰错误；不修改前端文件。",
+          "status": "succeeded",
+          "taskIds": [
+            "016dc38310f4da93c74acab7"
+          ],
+          "pending": null,
+          "instructions": [
+            "仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\"ok\":true}；GET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}；POST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。"
+          ],
+          "configSnapshot": {
+            "agentStage": "candidate",
+            "ownedPaths": [
+              "main.go",
+              "go.mod"
+            ],
+            "projectInstructions": "后台独立演示；不影响主桌面数据",
+            "lazySkills": true,
+            "schemaVersion": 1,
+            "capturedAt": "2026-10-20T02:38:53Z",
+            "executor": "code-v1",
+            "mode": "model",
+            "outputKind": "code",
+            "allowRemote": true,
+            "role": {
+              "id": "",
+              "name": "",
+              "description": "",
+              "instructions": "\n子 Agent 职责：根据自己的任务要求和明确提供的材料制作交付内容，保留关键事实和数字。",
+              "kind": "",
+              "skillIds": [
+                "builtin-skill-backend-development"
+              ],
+              "builtin": false
+            },
+            "roleHash": "b84f4bec3fab02951eead44647b3792f927ff5a0701b701aab02ba5ef0a99eb0",
+            "model": {
+              "id": "271f2936452ae74a23cab3bc",
+              "name": "deepseek",
+              "family": "openai",
+              "baseUrl": "https://api.deepseek.com",
+              "modelId": "deepseek-flash",
+              "credentialRef": "271f2936452ae74a23cab3bc"
+            },
+            "extensions": [
+              {
+                "builtin": true,
+                "category": "开发",
+                "id": "builtin-skill-backend-development",
+                "name": "后端与脚本开发",
+                "kind": "skill",
+                "description": "开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。",
+                "content": "---\nname: backend-development\ndescription: 开发 Go、Node.js 或 Python 的标准库服务与脚本，生成多文件代码项目并符合本机运行约定。\nmetadata:\n  display_name: 后端与脚本开发\n  category: 开发\n  kinds: code\n---\n# 后端与脚本开发\n\n遵守当前代码项目 JSON 交付结构，选择用户指定语言；未指定后端语言时优先 Go。提供完整入口和实际依赖文件，不把多个文件拼在一个代码围栏内。HTTP 服务用 server 模式，命令行脚本用 command 模式。\n\n使用标准库，不自动安装依赖或生成任意 shell 启动命令。服务读取 PORT 环境变量，只监听 127.0.0.1；GET / 返回可访问主页或 JSON 说明。前端文件与接口由同一服务提供，fetch、资源与表单使用 ./api 等相对路径。\n\n要求 Vue 时，用宿主内置的 Vue 3 全局构建 `./__opsbuddy_runtime__/vue.global.prod.js` 或 ESM 构建 `./__opsbuddy_runtime__/vue.esm-browser.prod.js`，不要引用 CDN 或重复生成运行库。使用 HTML 与 createApp，无需额外安装；不要生成尚无构建环境的 .vue 空壳。分别要求多个版本时，每个实现都有实际入口与使用说明。\n\n校验输入、限制请求体，错误返回适当状态码与清晰信息。文件操作仅针对任务所需的项目数据，不读取无关个人文件或模型凭据。日志记录运行状态，避免输出密钥。\n\nGo 提供 go.mod，Node 模块类型与入口一致，Python 文件按 UTF-8 编写。清楚区分源码生成、进程启动和服务就绪；没有运行证据时不能声称已成功启动。技能不代替运行器，也不增加依赖安装或终端权限。\n",
+                "enabled": true,
+                "version": "1.0.0",
+                "status": "内置 · 按需使用",
+                "contentHash": "8f0f789ca9fda33ff4d7b16023e8f315a5aef89cb7251934fa95b757ace73fca"
+              }
+            ]
+          },
+          "processedTaskId": "016dc38310f4da93c74acab7",
+          "retries": 0,
+          "currentPrompt": "仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\"ok\":true}；GET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}；POST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。"
+        },
+        {
+          "id": "review",
+          "role": "reviewer",
+          "name": "静态审阅",
+          "prompt": "静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。",
+          "dependsOn": [
+            "front",
+            "back"
+          ],
+          "acceptance": "产出静态审阅结论并覆盖全部验收项；明确“尚未执行测试”及动态接口测试待集成后由外层执行；无具体问题时通过，有具体问题时仅标记 front/back rework 并说明原因；不修改文件，不虚构运行或测试结果；确认前后端文件职责不重叠。",
+          "status": "succeeded",
+          "taskIds": [
+            "04a99d987eda7f648f3fd1a2"
+          ],
+          "pending": null,
+          "instructions": [
+            "静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。"
+          ],
+          "configSnapshot": {
+            "agentStage": "review",
+            "projectInstructions": "后台独立演示；不影响主桌面数据",
+            "lazySkills": true,
+            "schemaVersion": 1,
+            "capturedAt": "2026-10-20T02:38:53Z",
+            "executor": "code-v1",
+            "mode": "model",
+            "outputKind": "chat",
+            "allowRemote": true,
+            "role": {
+              "id": "",
+              "name": "",
+              "description": "",
+              "instructions": "\n子 Agent 职责：按验收条件核对已提供的上游成果，指出具体责任节点与问题，不得声称完成未做的验证。",
+              "kind": "",
+              "skillIds": null,
+              "builtin": false
+            },
+            "roleHash": "edb79f78755c541c8f4de84cfebf30a8f9c8fd347b3b08ed107aecb598bf22f1",
+            "model": {
+              "id": "271f2936452ae74a23cab3bc",
+              "name": "deepseek",
+              "family": "openai",
+              "baseUrl": "https://api.deepseek.com",
+              "modelId": "deepseek-flash",
+              "credentialRef": "271f2936452ae74a23cab3bc"
+            },
+            "extensions": null
+          },
+          "processedTaskId": "04a99d987eda7f648f3fd1a2",
+          "retries": 0,
+          "currentPrompt": "静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。"
+        }
+      ],
+      "createdAt": "2026-10-20T02:38:53Z",
+      "finishedAt": "2026-10-20T02:44:07Z",
+      "schemaVersion": 2,
+      "planVersion": 1,
+      "plan": {
+        "summary": "规划3个成员：front 与 back 并行开发，front 仅交付 index.html，back 仅交付 main.go 与 go.mod；review 作为唯一终端审阅者依赖两者，做静态契约、源码、安全和错误路径审阅并明确未执行测试。审阅通过后由主任务原样集成，最终 mode=server、runtime=go、entry=main.go，并在后台启动。",
+        "members": [
+          {
+            "id": "front",
+            "role": "worker",
+            "name": "前端看板",
+            "prompt": "仅创建/修改 index.html，ownedPaths 仅限 index.html，不得创建或修改 main.go、go.mod 等其他文件。实现独立单文件中文办公待办看板：内联 CSS/JS，零 CDN、零外部字体/图标/依赖；不得使用 localStorage 或假数据，所有待办必须通过 ./api/health、./api/todos、./api/todos/{id} 从后端读取和保存。视觉按用户指定：背景#F6F8FC、白色卡片、主色#4361D8、文字#26334A、完成色#27886D；Segoe UI/Microsoft YaHei；正文16px、标题28px、辅助14px。包含标题“今天，做完一件小事。”、任务输入/回车新增、完成切换、全部/进行中/已完成筛选、搜索、总数/完成数、空列表提示和真实错误提示；加载失败可重试，提交时防重复，用户标题必须用 textContent 等安全方式显示，不做删除功能。接口均使用 ./api/... 相对 URL。",
+            "modelId": "271f2936452ae74a23cab3bc",
+            "kind": "code",
+            "dependsOn": [],
+            "inputIds": [],
+            "ownedPaths": [
+              "index.html"
+            ],
+            "acceptance": "index.html 为独立单文件，可被 Go 服务 GET / 返回；视觉与交互满足用户要求；所有待办数据来自 API，无 localStorage、假数据、CDN 或外部资源；具备加载失败重试、防重复提交、真实错误提示；标题安全渲染；无删除功能；未修改其他成员文件。",
+            "failurePolicy": "block_dependents"
+          },
+          {
+            "id": "back",
+            "role": "worker",
+            "name": "Go 后端",
+            "prompt": "仅创建/修改 main.go 与 go.mod，ownedPaths 为 main.go、go.mod，不得修改 index.html 或其他文件。使用 Go 标准库实现 HTTP 服务；go.mod 使用 module opsbuddy-todo-demo、go 1.22。服务绑定 127.0.0.1，从 PORT 环境变量读取端口，默认 18086；GET / 返回当前目录 index.html。实现固定契约：GET ./api/health -\u003e 200 {\"ok\":true}；GET ./api/todos -\u003e 200 {\"items\":[{\"id\":1,\"title\":\"待办标题\",\"done\":false}]}；POST ./api/todos 接收 {\"title\":\"字符串\"} -\u003e 201 {\"item\":{\"id\":递增整数,\"title\":\"去首尾空白后的标题\",\"done\":false}}，空白标题或超过120个 Unicode 字符返回 400 JSON 错误，仅接受 JSON；PATCH ./api/todos/{整数id} 接收 {\"done\":true或false} -\u003e 200 {\"item\":更新对象}，不存在的 ID 返回 404。持久化到当前源码目录 data/todos.json，首次为空列表，服务器重启保留数据；使用 mutex 保护读写；保存失败返回明确 500 JSON，不伪装成功。校验输入、限制请求体，错误返回适当状态码与清晰信息，日志避免输出密钥。",
+            "modelId": "271f2936452ae74a23cab3bc",
+            "kind": "code",
+            "dependsOn": [],
+            "inputIds": [],
+            "skillIds": [
+              "builtin-skill-backend-development"
+            ],
+            "ownedPaths": [
+              "main.go",
+              "go.mod"
+            ],
+            "acceptance": "main.go 与 go.mod 完整且仅使用标准库；所有路由、方法、状态码和 JSON 结构符合契约；标题去首尾空白、空白与超过120个 Unicode 字符校验正确；绑定 127.0.0.1，PORT 默认18086；GET / 返回 index.html；data/todos.json 首次为空并持久化，mutex 保护读写；PATCH 不存在 ID 返回404；保存失败返回明确500；非法 JSON/请求体超限等返回清晰错误；不修改前端文件。",
+            "failurePolicy": "block_dependents"
+          },
+          {
+            "id": "review",
+            "role": "reviewer",
+            "name": "静态审阅",
+            "prompt": "静态审阅 front 交付的 index.html 与 back 交付的 main.go、go.mod，检查接口契约、源码职责、安全和错误路径。不得修改源码，不新增文件，不虚构运行结果。明确说明“尚未执行测试”，动态接口测试将在集成后由外层程序执行，不因本阶段不能运行而直接 blocked。审查重点：接口相对路径与固定契约、POST/PATCH 状态码、120个 Unicode 字符限制、400/404/500 错误路径、data/todos.json 持久化与 mutex、零外部依赖/CDN/localStorage/假数据、无删除功能、标题安全渲染、front 与 back 文件职责不重叠。仅当发现具体可定位问题时给出 rework 对象 front 或 back 及问题清单；无具体问题时给出静态审阅通过结论。",
+            "modelId": "271f2936452ae74a23cab3bc",
+            "kind": "chat",
+            "dependsOn": [
+              "front",
+              "back"
+            ],
+            "inputIds": [],
+            "acceptance": "产出静态审阅结论并覆盖全部验收项；明确“尚未执行测试”及动态接口测试待集成后由外层执行；无具体问题时通过，有具体问题时仅标记 front/back rework 并说明原因；不修改文件，不虚构运行或测试结果；确认前后端文件职责不重叠。",
+            "failurePolicy": "block_dependents"
+          }
+        ]
+      },
+      "plannerTaskId": "2fdd0f44eacb6028d1d7e751",
+      "modelCatalog": [
+        {
+          "id": "271f2936452ae74a23cab3bc",
+          "name": "deepseek",
+          "family": "openai",
+          "baseUrl": "https://api.deepseek.com",
+          "modelId": "deepseek-flash",
+          "credentialRef": "271f2936452ae74a23cab3bc"
+        }
+      ],
+      "limits": {
+        "members": 6,
+        "concurrency": 3,
+        "depth": 1,
+        "retries": 1,
+        "reworkRounds": 2
+      },
+      "reworkRound": 0,
+      "reviews": [
+        {
+          "status": "pass",
+          "summary": "静态审阅通过：front 的 index.html 为独立单文件，内联 CSS/JS，无 CDN、外部图标/字体、localStorage 或假数据；仅使用 ./api/... 相对接口读写，具备加载失败重试、防重复提交、真实错误提示，标题以 textContent 安全渲染，无删除功能。back 的 main.go、go.mod 仅使用标准库且模块/版本符合要求；健康检查、列表、创建、更新路由与固定 JSON 契约、201/200/400/404/500 错误路径、标题去首尾空白与 120 个 Unicode 字符限制、127.0.0.1 绑定、PORT 默认 18086、GET / 返回 index.html、data/todos.json 持久化及 mutex 保护均已静态核对。前后端文件职责不重叠。尚未执行测试或编译；动态接口测试待集成后由外层程序执行。",
+          "issues": [],
+          "taskId": "04a99d987eda7f648f3fd1a2",
+          "round": 0,
+          "at": "2026-10-20T02:43:19Z"
+        }
+      ],
+      "autoResume": false,
+      "resumeCount": 0,
+      "settling": true
+    }
+  ],
+  "assets": [
+    {
+      "asset": {
+        "id": "bcf7a3a1064ff8cb2b4eb677",
+        "name": "中文办公待办看板 Go 后端",
+        "kind": "code",
+        "size": 11553,
+        "projectId": "demo-todo",
+        "taskId": "016dc38310f4da93c74acab7",
+        "createdAt": "2026-10-20T02:40:21Z",
+        "preview": "go · fragment · ",
+        "validation": "源码目录；本机运行、文件编辑与日志预览"
+      },
+      "code": {
+        "title": "中文办公待办看板 Go 后端",
+        "runtime": "go",
+        "mode": "fragment",
+        "entry": "",
+        "files": [
+          {
+            "path": "main.go",
+            "content": "package main\n\nimport (\n    \"encoding/json\"\n    \"errors\"\n    \"io\"\n    \"log\"\n    \"mime\"\n    \"net\"\n    \"net/http\"\n    \"os\"\n    \"path/filepath\"\n    \"strconv\"\n    \"strings\"\n    \"sync\"\n    \"time\"\n    \"unicode/utf8\"\n)\n\nconst (\n    defaultPort   = \"18086\"\n    dataFilePath  = \"data/todos.json\"\n    indexFilePath = \"index.html\"\n    maxBodyBytes  = 16 \u003c\u003c 10\n    maxTitleRunes = 120\n)\n\ntype Todo struct {\n    ID    int    `json:\"id\"`\n    Title string `json:\"title\"`\n    Done  bool   `json:\"done\"`\n}\n\ntype Store struct {\n    mu     sync.RWMutex\n    path   string\n    items  []Todo\n    nextID int\n}\n\nvar errTodoNotFound = errors.New(\"todo not found\")\n\nfunc NewStore(path string) (*Store, error) {\n    if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {\n        return nil, err\n    }\n\n    data, err := os.ReadFile(path)\n    if errors.Is(err, os.ErrNotExist) {\n        store := \u0026Store{\n            path:   path,\n            items:  make([]Todo, 0),\n            nextID: 1,\n        }\n        if err := writeTodosFile(path, store.items); err != nil {\n            return nil, err\n        }\n        return store, nil\n    }\n    if err != nil {\n        return nil, err\n    }\n\n    var items []Todo\n    if err := json.Unmarshal(data, \u0026items); err != nil {\n        return nil, err\n    }\n    if items == nil {\n        items = make([]Todo, 0)\n    }\n\n    maxID := 0\n    for _, item := range items {\n        if item.ID \u003e maxID {\n            maxID = item.ID\n        }\n    }\n\n    return \u0026Store{\n        path:   path,\n        items:  items,\n        nextID: maxID + 1,\n    }, nil\n}\n\nfunc writeTodosFile(path string, items []Todo) error {\n    data, err := json.MarshalIndent(items, \"\", \"  \")\n    if err != nil {\n        return err\n    }\n    data = append(data, '\\n')\n\n    dir := filepath.Dir(path)\n    tmp, err := os.CreateTemp(dir, \".todos-*.tmp\")\n    if err != nil {\n        return err\n    }\n    tmpName := tmp.Name()\n    cleanup := func() {\n        _ = os.Remove(tmpName)\n    }\n\n    if _, err := tmp.Write(data); err != nil {\n        _ = tmp.Close()\n        cleanup()\n        return err\n    }\n    if err := tmp.Sync(); err != nil {\n        _ = tmp.Close()\n        cleanup()\n        return err\n    }\n    if err := tmp.Close(); err != nil {\n        cleanup()\n        return err\n    }\n    if err := os.Rename(tmpName, path); err != nil {\n        cleanup()\n        return err\n    }\n    return nil\n}\n\nfunc (s *Store) List() []Todo {\n    s.mu.RLock()\n    defer s.mu.RUnlock()\n\n    out := make([]Todo, len(s.items))\n    copy(out, s.items)\n    return out\n}\n\nfunc (s *Store) Add(title string) (Todo, error) {\n    s.mu.Lock()\n    defer s.mu.Unlock()\n\n    oldItems := s.items\n    oldNextID := s.nextID\n    item := Todo{\n        ID:    s.nextID,\n        Title: title,\n        Done:  false,\n    }\n\n    s.items = append(s.items, item)\n    s.nextID++\n\n    if err := writeTodosFile(s.path, s.items); err != nil {\n        s.items = oldItems\n        s.nextID = oldNextID\n        return Todo{}, err\n    }\n    return item, nil\n}\n\nfunc (s *Store) SetDone(id int, done bool) (Todo, error) {\n    s.mu.Lock()\n    defer s.mu.Unlock()\n\n    for i := range s.items {\n        if s.items[i].ID != id {\n            continue\n        }\n\n        oldItem := s.items[i]\n        s.items[i].Done = done\n        if err := writeTodosFile(s.path, s.items); err != nil {\n            s.items[i] = oldItem\n            return Todo{}, err\n        }\n        return s.items[i], nil\n    }\n    return Todo{}, errTodoNotFound\n}\n\ntype server struct {\n    store     *Store\n    indexPath string\n}\n\ntype itemsResponse struct {\n    Items []Todo `json:\"items\"`\n}\n\ntype itemResponse struct {\n    Item Todo `json:\"item\"`\n}\n\ntype errorResponse struct {\n    Error string `json:\"error\"`\n}\n\nfunc (s *server) routes() http.Handler {\n    mux := http.NewServeMux()\n    mux.HandleFunc(\"/api/health\", s.handleHealth)\n    mux.HandleFunc(\"/api/todos\", s.handleTodos)\n    mux.HandleFunc(\"/api/todos/\", s.handleTodoByID)\n    mux.HandleFunc(\"/\", s.handleIndex)\n    return mux\n}\n\nfunc (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {\n    if r.Method != http.MethodGet {\n        methodNotAllowed(w, http.MethodGet)\n        return\n    }\n    writeJSON(w, http.StatusOK, struct {\n        OK bool `json:\"ok\"`\n    }{OK: true})\n}\n\nfunc (s *server) handleTodos(w http.ResponseWriter, r *http.Request) {\n    switch r.Method {\n    case http.MethodGet:\n        writeJSON(w, http.StatusOK, itemsResponse{Items: s.store.List()})\n    case http.MethodPost:\n        s.handleCreateTodo(w, r)\n    default:\n        methodNotAllowed(w, \"GET, POST\")\n    }\n}\n\nfunc (s *server) handleCreateTodo(w http.ResponseWriter, r *http.Request) {\n    if !hasJSONContentType(r) {\n        writeError(w, http.StatusUnsupportedMediaType, \"Content-Type 必须为 application/json\")\n        return\n    }\n\n    var req struct {\n        Title string `json:\"title\"`\n    }\n    if !decodeJSONBody(w, r, \u0026req) {\n        return\n    }\n\n    title := strings.TrimSpace(req.Title)\n    if title == \"\" {\n        writeError(w, http.StatusBadRequest, \"标题不能为空\")\n        return\n    }\n    if utf8.RuneCountInString(title) \u003e maxTitleRunes {\n        writeError(w, http.StatusBadRequest, \"标题不能超过120个Unicode字符\")\n        return\n    }\n\n    item, err := s.store.Add(title)\n    if err != nil {\n        log.Printf(\"保存新增待办失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"保存待办数据失败，请稍后重试\")\n        return\n    }\n    writeJSON(w, http.StatusCreated, itemResponse{Item: item})\n}\n\nfunc (s *server) handleTodoByID(w http.ResponseWriter, r *http.Request) {\n    if r.Method != http.MethodPatch {\n        methodNotAllowed(w, http.MethodPatch)\n        return\n    }\n\n    rawID := strings.TrimPrefix(r.URL.Path, \"/api/todos/\")\n    if rawID == \"\" || strings.Contains(rawID, \"/\") {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n    id, err := strconv.Atoi(rawID)\n    if err != nil || id \u003c= 0 {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n\n    if !hasJSONContentType(r) {\n        writeError(w, http.StatusUnsupportedMediaType, \"Content-Type 必须为 application/json\")\n        return\n    }\n\n    var req struct {\n        Done *bool `json:\"done\"`\n    }\n    if !decodeJSONBody(w, r, \u0026req) {\n        return\n    }\n    if req.Done == nil {\n        writeError(w, http.StatusBadRequest, \"done 字段必须是布尔值\")\n        return\n    }\n\n    item, err := s.store.SetDone(id, *req.Done)\n    if errors.Is(err, errTodoNotFound) {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n    if err != nil {\n        log.Printf(\"保存待办状态失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"保存待办数据失败，请稍后重试\")\n        return\n    }\n    writeJSON(w, http.StatusOK, itemResponse{Item: item})\n}\n\nfunc (s *server) handleIndex(w http.ResponseWriter, r *http.Request) {\n    if r.URL.Path != \"/\" {\n        writeError(w, http.StatusNotFound, \"页面不存在\")\n        return\n    }\n    if r.Method != http.MethodGet {\n        methodNotAllowed(w, http.MethodGet)\n        return\n    }\n\n    data, err := os.ReadFile(s.indexPath)\n    if err != nil {\n        log.Printf(\"读取 index.html 失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"读取首页失败\")\n        return\n    }\n\n    w.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n    w.Header().Set(\"Cache-Control\", \"no-store\")\n    w.WriteHeader(http.StatusOK)\n    _, _ = w.Write(data)\n}\n\nfunc hasJSONContentType(r *http.Request) bool {\n    raw := strings.TrimSpace(r.Header.Get(\"Content-Type\"))\n    if raw == \"\" {\n        return true\n    }\n    mediaType, _, err := mime.ParseMediaType(raw)\n    if err != nil {\n        return false\n    }\n    return strings.EqualFold(mediaType, \"application/json\")\n}\n\nfunc decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {\n    r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)\n    decoder := json.NewDecoder(r.Body)\n    decoder.DisallowUnknownFields()\n\n    if err := decoder.Decode(dst); err != nil {\n        if isBodyTooLarge(err) {\n            writeError(w, http.StatusRequestEntityTooLarge, \"请求体过大\")\n        } else {\n            writeError(w, http.StatusBadRequest, \"请求体必须是合法的 JSON 对象\")\n        }\n        return false\n    }\n\n    var extra any\n    if err := decoder.Decode(\u0026extra); err != io.EOF {\n        if err == nil {\n            writeError(w, http.StatusBadRequest, \"请求体只能包含一个 JSON 对象\")\n        } else if isBodyTooLarge(err) {\n            writeError(w, http.StatusRequestEntityTooLarge, \"请求体过大\")\n        } else {\n            writeError(w, http.StatusBadRequest, \"请求体包含无效的 JSON 内容\")\n        }\n        return false\n    }\n    return true\n}\n\nfunc isBodyTooLarge(err error) bool {\n    var maxBytesError *http.MaxBytesError\n    return errors.As(err, \u0026maxBytesError)\n}\n\nfunc methodNotAllowed(w http.ResponseWriter, allow string) {\n    w.Header().Set(\"Allow\", allow)\n    writeError(w, http.StatusMethodNotAllowed, \"请求方法不允许\")\n}\n\nfunc writeError(w http.ResponseWriter, status int, message string) {\n    writeJSON(w, status, errorResponse{Error: message})\n}\n\nfunc writeJSON(w http.ResponseWriter, status int, payload any) {\n    w.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n    w.Header().Set(\"Cache-Control\", \"no-store\")\n    w.WriteHeader(status)\n    if err := json.NewEncoder(w).Encode(payload); err != nil {\n        log.Printf(\"写入 JSON 响应失败: %v\", err)\n    }\n}\n\nfunc main() {\n    port := strings.TrimSpace(os.Getenv(\"PORT\"))\n    if port == \"\" {\n        port = defaultPort\n    }\n    portNumber, err := strconv.Atoi(port)\n    if err != nil || portNumber \u003c 1 || portNumber \u003e 65535 {\n        log.Fatalf(\"无效的 PORT 环境变量: %q\", port)\n    }\n\n    store, err := NewStore(dataFilePath)\n    if err != nil {\n        log.Fatalf(\"初始化待办数据失败: %v\", err)\n    }\n\n    app := \u0026server{store: store, indexPath: indexFilePath}\n    addr := net.JoinHostPort(\"127.0.0.1\", port)\n    listener, err := net.Listen(\"tcp\", addr)\n    if err != nil {\n        log.Fatalf(\"监听 %s 失败: %v\", addr, err)\n    }\n\n    httpServer := \u0026http.Server{\n        Handler:           app.routes(),\n        ReadHeaderTimeout: 5 * time.Second,\n        IdleTimeout:       60 * time.Second,\n    }\n\n    log.Printf(\"中文办公待办看板服务正在运行: http://%s\", listener.Addr().String())\n    if err := httpServer.Serve(listener); err != nil \u0026\u0026 !errors.Is(err, http.ErrServerClosed) {\n        log.Fatalf(\"HTTP 服务异常退出: %v\", err)\n    }\n}\n"
+          },
+          {
+            "path": "go.mod",
+            "content": "module opsbuddy-todo-demo\n\ngo 1.22\n"
+          }
+        ]
+      }
+    },
+    {
+      "asset": {
+        "id": "8a4e56b39677732513667d3d",
+        "name": "中文办公待办看板 index.html",
+        "kind": "code",
+        "size": 22086,
+        "projectId": "demo-todo",
+        "taskId": "fed5a37fa60a91607eeeb8b7",
+        "createdAt": "2026-10-20T02:42:26Z",
+        "preview": "go · fragment · ",
+        "validation": "源码目录；本机运行、文件编辑与日志预览"
+      },
+      "code": {
+        "title": "中文办公待办看板 index.html",
+        "runtime": "go",
+        "mode": "fragment",
+        "entry": "",
+        "files": [
+          {
+            "path": "index.html",
+            "content": "\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"zh-CN\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1\"\u003e\n\u003ctitle\u003e今天，做完一件小事。 · 办公待办看板\u003c/title\u003e\n\u003cstyle\u003e\n*,\n*::before,\n*::after { box-sizing: border-box; }\n\nhtml,\nbody { margin: 0; padding: 0; }\n\nbody {\n  background: #F6F8FC;\n  color: #26334A;\n  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;\n  font-size: 16px;\n  line-height: 1.55;\n  -webkit-font-smoothing: antialiased;\n  text-rendering: optimizeLegibility;\n}\n\n[hidden] { display: none !important; }\n\n.wrap {\n  max-width: 840px;\n  margin: 0 auto;\n  padding: 32px 20px 64px;\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n}\n\n.card {\n  background: #FFFFFF;\n  border: 1px solid #E4EAF5;\n  border-radius: 16px;\n  box-shadow: 0 8px 24px rgba(38, 51, 74, 0.06);\n  padding: 24px;\n}\n\n.hero h1 {\n  margin: 0 0 8px;\n  font-size: 28px;\n  line-height: 1.3;\n  font-weight: 700;\n  letter-spacing: .5px;\n  color: #26334A;\n}\n\n.subtitle {\n  margin: 0;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.stats {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 10px;\n  margin-top: 16px;\n}\n\n.stat {\n  font-size: 14px;\n  color: #26334A;\n  background: #EEF2FC;\n  border: 1px solid #E1E8F8;\n  border-radius: 999px;\n  padding: 5px 14px;\n}\n\n.stat strong {\n  color: #4361D8;\n  font-weight: 700;\n  margin-left: 2px;\n}\n\n.field-label {\n  margin: 0 0 10px;\n  font-size: 14px;\n  font-weight: 600;\n  color: #6B7891;\n  letter-spacing: .3px;\n}\n\n.composer-row {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n}\n\n.composer-row input[type='text'] {\n  flex: 1 1 260px;\n  min-width: 0;\n  padding: 12px 16px;\n  font-size: 16px;\n  font-family: inherit;\n  color: #26334A;\n  background: #FBFCFE;\n  border: 1px solid #DCE3F0;\n  border-radius: 10px;\n}\n\n.composer-row input[type='text']::placeholder,\n.search input::placeholder {\n  color: #9AA6BC;\n}\n\n.btn-primary {\n  flex: 0 0 auto;\n  min-width: 112px;\n  padding: 12px 24px;\n  font-size: 16px;\n  font-family: inherit;\n  font-weight: 600;\n  color: #FFFFFF;\n  background: #4361D8;\n  border: 1px solid #4361D8;\n  border-radius: 10px;\n  cursor: pointer;\n  transition: background-color .15s ease, border-color .15s ease;\n}\n\n.btn-primary:hover:not(:disabled) {\n  background: #3550BE;\n  border-color: #3550BE;\n}\n\n.btn-primary:disabled {\n  opacity: .6;\n  cursor: not-allowed;\n}\n\n.hint {\n  margin: 10px 0 0;\n  font-size: 14px;\n  color: #7C89A0;\n}\n\n.form-error {\n  margin-top: 12px;\n  padding: 9px 12px;\n  font-size: 14px;\n  color: #B03A2E;\n  background: #FDECEA;\n  border: 1px solid #F5C6C0;\n  border-radius: 8px;\n}\n\n.toolbar {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n  align-items: center;\n  justify-content: space-between;\n  margin-bottom: 16px;\n}\n\n.filters {\n  display: inline-flex;\n  gap: 4px;\n  padding: 4px;\n  background: #EEF2FC;\n  border-radius: 10px;\n}\n\n.filter-btn {\n  padding: 8px 16px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #26334A;\n  background: transparent;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: background-color .15s ease, color .15s ease;\n}\n\n.filter-btn:hover { background: #E2E9FA; }\n\n.filter-btn.active {\n  color: #4361D8;\n  font-weight: 600;\n  background: #FFFFFF;\n  box-shadow: 0 1px 3px rgba(38, 51, 74, .12);\n}\n\n.search input {\n  width: 220px;\n  padding: 10px 14px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #26334A;\n  background: #FBFCFE;\n  border: 1px solid #DCE3F0;\n  border-radius: 10px;\n}\n\ninput:focus-visible,\nbutton:focus-visible {\n  outline: 2px solid #4361D8;\n  outline-offset: 2px;\n}\n\n.alert {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n  align-items: center;\n  margin-bottom: 14px;\n  padding: 12px 14px;\n  font-size: 14px;\n  color: #B03A2E;\n  background: #FDECEA;\n  border: 1px solid #F5C6C0;\n  border-radius: 10px;\n}\n\n.alert-text {\n  flex: 1 1 220px;\n  min-width: 0;\n  word-break: break-word;\n}\n\n.alert button {\n  padding: 6px 14px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #B03A2E;\n  background: #FFFFFF;\n  border: 1px solid #E8A9A0;\n  border-radius: 8px;\n  cursor: pointer;\n}\n\n.alert button:hover:not(:disabled) { background: #FBDFDA; }\n\n.alert button:disabled { opacity: .6; cursor: not-allowed; }\n\n.loading {\n  padding: 16px 0;\n  text-align: center;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.spinner {\n  display: inline-block;\n  width: 14px;\n  height: 14px;\n  margin-right: 8px;\n  vertical-align: -2px;\n  border: 2px solid #C9D4EA;\n  border-top-color: #4361D8;\n  border-radius: 50%;\n  animation: spin .8s linear infinite;\n}\n\n@keyframes spin { to { transform: rotate(360deg); } }\n\n.todo-list {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n  display: flex;\n  flex-direction: column;\n}\n\n.todo-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 12px;\n  padding: 14px 4px;\n  border-bottom: 1px solid #EDF1F8;\n}\n\n.todo-item:last-child { border-bottom: none; }\n\n.todo-toggle {\n  flex: 0 0 auto;\n  width: 24px;\n  height: 24px;\n  margin-top: 1px;\n  padding: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: #FFFFFF;\n  border: 2px solid #C3CCDF;\n  border-radius: 7px;\n  cursor: pointer;\n  transition: background-color .15s ease, border-color .15s ease;\n}\n\n.todo-toggle:hover:not(:disabled) { border-color: #4361D8; }\n\n.todo-toggle::after {\n  content: '';\n  width: 6px;\n  height: 11px;\n  border-right: 2.5px solid #FFFFFF;\n  border-bottom: 2.5px solid #FFFFFF;\n  transform: rotate(45deg) translate(-1px, -2px);\n  opacity: 0;\n}\n\n.todo-toggle.done {\n  background: #27886D;\n  border-color: #27886D;\n}\n\n.todo-toggle.done::after { opacity: 1; }\n\n.todo-toggle:disabled { cursor: progress; opacity: .55; }\n\n.todo-title {\n  flex: 1 1 auto;\n  min-width: 0;\n  font-size: 16px;\n  word-break: break-word;\n}\n\n.todo-item.is-done .todo-title {\n  color: #8B97AC;\n  text-decoration: line-through;\n}\n\n.todo-status {\n  flex: 0 0 auto;\n  margin-top: 2px;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.todo-item.is-done .todo-status { color: #27886D; }\n\n.empty {\n  margin: 20px 0 4px;\n  padding: 26px 16px;\n  text-align: center;\n  font-size: 14px;\n  color: #6B7891;\n  background: #FAFBFE;\n  border: 1px dashed #DCE3F0;\n  border-radius: 12px;\n}\n\n@media (max-width: 600px) {\n  .wrap { padding: 20px 14px 48px; gap: 16px; }\n  .card { padding: 18px; border-radius: 14px; }\n  .toolbar { align-items: stretch; }\n  .filters { width: 100%; }\n  .filter-btn { flex: 1 1 auto; }\n  .search { width: 100%; }\n  .search input { width: 100%; }\n  .btn-primary { width: 100%; }\n}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cdiv class=\"wrap\"\u003e\n  \u003cheader class=\"card hero\"\u003e\n    \u003ch1\u003e今天，做完一件小事。\u003c/h1\u003e\n    \u003cp class=\"subtitle\"\u003e中文办公待办看板 · 数据保存在本地服务\u003c/p\u003e\n    \u003cdiv class=\"stats\"\u003e\n      \u003cspan class=\"stat\"\u003e总数 \u003cstrong id=\"statTotal\"\u003e0\u003c/strong\u003e\u003c/span\u003e\n      \u003cspan class=\"stat\"\u003e已完成 \u003cstrong id=\"statDone\"\u003e0\u003c/strong\u003e\u003c/span\u003e\n    \u003c/div\u003e\n  \u003c/header\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cp class=\"field-label\"\u003e添加待办\u003c/p\u003e\n    \u003cform id=\"composerForm\" class=\"composer-row\" autocomplete=\"off\"\u003e\n      \u003cinput id=\"titleInput\" type=\"text\" placeholder=\"例如：整理周会要点\" aria-label=\"待办标题\"\u003e\n      \u003cbutton id=\"addBtn\" class=\"btn-primary\" type=\"submit\"\u003e添加待办\u003c/button\u003e\n    \u003c/form\u003e\n    \u003cp class=\"hint\"\u003e按回车快速添加 · 标题最多 120 个字符\u003c/p\u003e\n    \u003cdiv id=\"formError\" class=\"form-error\" role=\"alert\" hidden\u003e\u003c/div\u003e\n  \u003c/section\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cdiv class=\"toolbar\"\u003e\n      \u003cdiv class=\"filters\" role=\"group\" aria-label=\"筛选待办\"\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn active\" data-filter=\"all\" aria-pressed=\"true\"\u003e全部\u003c/button\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn\" data-filter=\"active\" aria-pressed=\"false\"\u003e进行中\u003c/button\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn\" data-filter=\"done\" aria-pressed=\"false\"\u003e已完成\u003c/button\u003e\n      \u003c/div\u003e\n      \u003cdiv class=\"search\"\u003e\n        \u003cinput id=\"searchInput\" type=\"search\" placeholder=\"搜索待办\" aria-label=\"搜索待办\"\u003e\n      \u003c/div\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"loadError\" class=\"alert\" role=\"alert\" hidden\u003e\n      \u003cspan id=\"loadErrorText\" class=\"alert-text\"\u003e\u003c/span\u003e\n      \u003cbutton id=\"retryBtn\" type=\"button\"\u003e重试\u003c/button\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"listError\" class=\"alert\" role=\"alert\" hidden\u003e\n      \u003cspan id=\"listErrorText\" class=\"alert-text\"\u003e\u003c/span\u003e\n      \u003cbutton id=\"dismissErrorBtn\" type=\"button\"\u003e知道了\u003c/button\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"loadingState\" class=\"loading\" hidden\u003e\n      \u003cspan class=\"spinner\" aria-hidden=\"true\"\u003e\u003c/span\u003e正在加载待办…\n    \u003c/div\u003e\n\n    \u003cul id=\"todoList\" class=\"todo-list\"\u003e\u003c/ul\u003e\n    \u003cp id=\"emptyState\" class=\"empty\" hidden\u003e\u003c/p\u003e\n  \u003c/section\u003e\n\u003c/div\u003e\n\u003cscript\u003e\n(function () {\n  'use strict';\n\n  var MAX_TITLE_LENGTH = 120;\n  var REQUEST_TIMEOUT = 10000;\n\n  var state = {\n    items: [],\n    filter: 'all',\n    query: '',\n    loading: true,\n    loadError: '',\n    listError: '',\n    submitting: false,\n    pendingIds: new Set(),\n    focusId: null\n  };\n\n  var el = {};\n\n  function byId(id) {\n    return document.getElementById(id);\n  }\n\n  function normalizeItem(raw) {\n    if (!raw || typeof raw !== 'object') return null;\n    if (typeof raw.id !== 'number' || !isFinite(raw.id)) return null;\n    if (typeof raw.title !== 'string') return null;\n    return { id: raw.id, title: raw.title, done: raw.done === true };\n  }\n\n  async function request(url, options) {\n    var opts = {};\n    if (options) {\n      for (var key in options) {\n        if (Object.prototype.hasOwnProperty.call(options, key)) opts[key] = options[key];\n      }\n    }\n    opts.headers = Object.assign({ Accept: 'application/json' }, opts.headers || {});\n\n    var controller = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = null;\n    if (controller) {\n      opts.signal = controller.signal;\n      timer = setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT);\n    }\n\n    var res;\n    var text;\n    try {\n      res = await fetch(url, opts);\n      text = await res.text();\n    } catch (err) {\n      if (timer) clearTimeout(timer);\n      if (err \u0026\u0026 err.name === 'AbortError') throw new Error('请求超时，请稍后重试。');\n      throw new Error('无法连接后端服务，请确认服务已启动后重试。');\n    }\n    if (timer) clearTimeout(timer);\n\n    var data = null;\n    if (text) {\n      try { data = JSON.parse(text); } catch (e) { data = null; }\n    }\n\n    if (!res.ok) {\n      var message = data \u0026\u0026 (data.error || data.message)\n        ? String(data.error || data.message)\n        : '请求失败（HTTP ' + res.status + '）';\n      var httpError = new Error(message);\n      httpError.status = res.status;\n      throw httpError;\n    }\n\n    if (data === null) throw new Error('服务器返回了无法解析的数据。');\n    return data;\n  }\n\n  function apiHealth() {\n    return request('./api/health');\n  }\n\n  function apiList() {\n    return request('./api/todos');\n  }\n\n  function apiCreate(title) {\n    return request('./api/todos', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ title: title })\n    });\n  }\n\n  function apiUpdate(id, done) {\n    return request('./api/todos/' + encodeURIComponent(String(id)), {\n      method: 'PATCH',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ done: done })\n    });\n  }\n\n  async function loadTodos() {\n    state.loading = true;\n    state.loadError = '';\n    render();\n    try {\n      var health = await apiHealth();\n      if (!health || health.ok !== true) throw new Error('后端健康检查未通过，请稍后重试。');\n\n      var data = await apiList();\n      if (!data || !Array.isArray(data.items)) throw new Error('待办数据格式异常。');\n\n      var items = [];\n      for (var i = 0; i \u003c data.items.length; i++) {\n        var item = normalizeItem(data.items[i]);\n        if (!item) throw new Error('待办数据格式异常。');\n        items.push(item);\n      }\n      state.items = items;\n      state.listError = '';\n    } catch (err) {\n      state.loadError = err \u0026\u0026 err.message ? err.message : '加载失败，请重试。';\n    } finally {\n      state.loading = false;\n      render();\n    }\n  }\n\n  async function addTodo(rawTitle) {\n    if (state.submitting) return;\n\n    var title = String(rawTitle == null ? '' : rawTitle).trim();\n    if (!title) {\n      showFormError('请输入待办标题。');\n      return;\n    }\n    if (Array.from(title).length \u003e MAX_TITLE_LENGTH) {\n      showFormError('标题不能超过 ' + MAX_TITLE_LENGTH + ' 个字符。');\n      return;\n    }\n\n    clearFormError();\n    state.submitting = true;\n    renderComposer();\n\n    try {\n      var data = await apiCreate(title);\n      var item = normalizeItem(data \u0026\u0026 data.item);\n      if (!item) throw new Error('服务器返回的待办数据格式异常。');\n      state.items.push(item);\n      if (state.filter === 'done') state.filter = 'all';\n      el.input.value = '';\n      state.listError = '';\n    } catch (err) {\n      showFormError(err \u0026\u0026 err.message ? err.message : '添加失败，请重试。');\n    } finally {\n      state.submitting = false;\n      render();\n      el.input.focus();\n    }\n  }\n\n  async function toggleTodo(id) {\n    if (state.pendingIds.has(id)) return;\n\n    var target = null;\n    for (var i = 0; i \u003c state.items.length; i++) {\n      if (state.items[i].id === id) { target = state.items[i]; break; }\n    }\n    if (!target) return;\n\n    state.pendingIds.add(id);\n    renderList();\n\n    try {\n      var data = await apiUpdate(id, !target.done);\n      var updated = normalizeItem(data \u0026\u0026 data.item);\n      if (!updated) throw new Error('服务器返回的待办数据格式异常。');\n      for (var j = 0; j \u003c state.items.length; j++) {\n        if (state.items[j].id === updated.id) { state.items[j] = updated; break; }\n      }\n      state.listError = '';\n    } catch (err) {\n      state.listError = '更新「' + target.title + '」失败：' + (err \u0026\u0026 err.message ? err.message : '请重试。');\n    } finally {\n      state.pendingIds.delete(id);\n      state.focusId = id;\n      render();\n    }\n  }\n\n  function filterItems() {\n    var q = state.query.trim().toLowerCase();\n    return state.items.filter(function (item) {\n      if (state.filter === 'active' \u0026\u0026 item.done) return false;\n      if (state.filter === 'done' \u0026\u0026 !item.done) return false;\n      if (q !== '' \u0026\u0026 item.title.toLowerCase().indexOf(q) === -1) return false;\n      return true;\n    });\n  }\n\n  function buildItem(item) {\n    var li = document.createElement('li');\n    li.className = 'todo-item' + (item.done ? ' is-done' : '');\n\n    var pending = state.pendingIds.has(item.id);\n\n    var toggle = document.createElement('button');\n    toggle.type = 'button';\n    toggle.className = 'todo-toggle' + (item.done ? ' done' : '');\n    toggle.setAttribute('data-id', String(item.id));\n    toggle.setAttribute('aria-pressed', item.done ? 'true' : 'false');\n    toggle.setAttribute('aria-label', (item.done ? '标记为未完成：' : '标记为已完成：') + item.title);\n    if (pending) toggle.disabled = true;\n    toggle.addEventListener('click', function () { toggleTodo(item.id); });\n\n    var title = document.createElement('span');\n    title.className = 'todo-title';\n    title.textContent = item.title;\n\n    var status = document.createElement('span');\n    status.className = 'todo-status';\n    status.textContent = pending ? '保存中…' : (item.done ? '已完成' : '进行中');\n\n    li.appendChild(toggle);\n    li.appendChild(title);\n    li.appendChild(status);\n    return li;\n  }\n\n  function renderStats() {\n    var done = 0;\n    for (var i = 0; i \u003c state.items.length; i++) {\n      if (state.items[i].done) done++;\n    }\n    el.statTotal.textContent = String(state.items.length);\n    el.statDone.textContent = String(done);\n  }\n\n  function renderFilters() {\n    for (var i = 0; i \u003c el.filterBtns.length; i++) {\n      var btn = el.filterBtns[i];\n      var active = btn.getAttribute('data-filter') === state.filter;\n      btn.classList.toggle('active', active);\n      btn.setAttribute('aria-pressed', active ? 'true' : 'false');\n    }\n  }\n\n  function renderComposer() {\n    el.addBtn.disabled = state.submitting;\n    el.addBtn.textContent = state.submitting ? '添加中…' : '添加待办';\n  }\n\n  function renderStatus() {\n    el.loading.hidden = !state.loading;\n\n    var hasLoadError = !state.loading \u0026\u0026 !!state.loadError;\n    el.loadError.hidden = !hasLoadError;\n    if (hasLoadError) el.loadErrorText.textContent = state.loadError;\n    el.retryBtn.disabled = state.loading;\n\n    var hasListError = !!state.listError;\n    el.listError.hidden = !hasListError;\n    if (hasListError) el.listErrorText.textContent = state.listError;\n  }\n\n  function renderList() {\n    el.list.textContent = '';\n\n    var visible = filterItems();\n    for (var i = 0; i \u003c visible.length; i++) {\n      el.list.appendChild(buildItem(visible[i]));\n    }\n\n    var showEmpty = !state.loading \u0026\u0026 !state.loadError \u0026\u0026 visible.length === 0;\n    el.empty.hidden = !showEmpty;\n    if (showEmpty) {\n      if (state.items.length === 0) {\n        el.empty.textContent = '还没有待办，先写下今天要做的第一件小事吧。';\n      } else if (state.query.trim() !== '') {\n        el.empty.textContent = '没有找到匹配的待办，换个关键词试试。';\n      } else if (state.filter === 'active') {\n        el.empty.textContent = '进行中的待办已清空，全部完成。';\n      } else if (state.filter === 'done') {\n        el.empty.textContent = '还没有已完成的待办。';\n      } else {\n        el.empty.textContent = '暂无待办。';\n      }\n    }\n\n    if (state.focusId !== null) {\n      var target = el.list.querySelector('.todo-toggle[data-id=\"' + state.focusId + '\"]');\n      if (target \u0026\u0026 typeof target.focus === 'function') target.focus();\n      state.focusId = null;\n    }\n  }\n\n  function render() {\n    renderStats();\n    renderFilters();\n    renderComposer();\n    renderStatus();\n    renderList();\n  }\n\n  function showFormError(message) {\n    el.formError.textContent = message;\n    el.formError.hidden = false;\n  }\n\n  function clearFormError() {\n    el.formError.textContent = '';\n    el.formError.hidden = true;\n  }\n\n  function bindEvents() {\n    el.form.addEventListener('submit', function (event) {\n      event.preventDefault();\n      addTodo(el.input.value);\n    });\n\n    el.input.addEventListener('input', function () {\n      if (!el.formError.hidden) clearFormError();\n    });\n\n    el.search.addEventListener('input', function () {\n      state.query = el.search.value;\n      renderList();\n    });\n\n    el.filterBtns.forEach(function (btn) {\n      btn.addEventListener('click', function () {\n        var next = btn.getAttribute('data-filter');\n        if (next !== 'all' \u0026\u0026 next !== 'active' \u0026\u0026 next !== 'done') return;\n        if (state.filter === next) return;\n        state.filter = next;\n        renderFilters();\n        renderList();\n      });\n    });\n\n    el.retryBtn.addEventListener('click', function () {\n      if (state.loading) return;\n      loadTodos();\n    });\n\n    el.dismissErrorBtn.addEventListener('click', function () {\n      state.listError = '';\n      renderStatus();\n    });\n  }\n\n  function init() {\n    el.form = byId('composerForm');\n    el.input = byId('titleInput');\n    el.addBtn = byId('addBtn');\n    el.formError = byId('formError');\n    el.search = byId('searchInput');\n    el.list = byId('todoList');\n    el.empty = byId('emptyState');\n    el.loading = byId('loadingState');\n    el.loadError = byId('loadError');\n    el.loadErrorText = byId('loadErrorText');\n    el.retryBtn = byId('retryBtn');\n    el.listError = byId('listError');\n    el.listErrorText = byId('listErrorText');\n    el.dismissErrorBtn = byId('dismissErrorBtn');\n    el.statTotal = byId('statTotal');\n    el.statDone = byId('statDone');\n    el.filterBtns = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));\n\n    bindEvents();\n    render();\n    loadTodos();\n  }\n\n  init();\n})();\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n"
+          }
+        ]
+      }
+    },
+    {
+      "asset": {
+        "id": "246f4134b5605438ca359899",
+        "name": "中文办公待办看板 Demo",
+        "kind": "code",
+        "size": 33538,
+        "projectId": "demo-todo",
+        "taskId": "c67ca2c3929e20a4f01ad3f7",
+        "parentId": "bcf7a3a1064ff8cb2b4eb677",
+        "createdAt": "2026-10-20T02:44:06Z",
+        "preview": "go · server · main.go",
+        "validation": "源码目录；本机运行、文件编辑与日志预览"
+      },
+      "code": {
+        "title": "中文办公待办看板 Demo",
+        "runtime": "go",
+        "mode": "server",
+        "entry": "main.go",
+        "files": [
+          {
+            "path": "index.html",
+            "content": "\u003c!DOCTYPE html\u003e\n\u003chtml lang=\"zh-CN\"\u003e\n\u003chead\u003e\n\u003cmeta charset=\"utf-8\"\u003e\n\u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1\"\u003e\n\u003ctitle\u003e今天，做完一件小事。 · 办公待办看板\u003c/title\u003e\n\u003cstyle\u003e\n*,\n*::before,\n*::after { box-sizing: border-box; }\n\nhtml,\nbody { margin: 0; padding: 0; }\n\nbody {\n  background: #F6F8FC;\n  color: #26334A;\n  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;\n  font-size: 16px;\n  line-height: 1.55;\n  -webkit-font-smoothing: antialiased;\n  text-rendering: optimizeLegibility;\n}\n\n[hidden] { display: none !important; }\n\n.wrap {\n  max-width: 840px;\n  margin: 0 auto;\n  padding: 32px 20px 64px;\n  display: flex;\n  flex-direction: column;\n  gap: 20px;\n}\n\n.card {\n  background: #FFFFFF;\n  border: 1px solid #E4EAF5;\n  border-radius: 16px;\n  box-shadow: 0 8px 24px rgba(38, 51, 74, 0.06);\n  padding: 24px;\n}\n\n.hero h1 {\n  margin: 0 0 8px;\n  font-size: 28px;\n  line-height: 1.3;\n  font-weight: 700;\n  letter-spacing: .5px;\n  color: #26334A;\n}\n\n.subtitle {\n  margin: 0;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.stats {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 10px;\n  margin-top: 16px;\n}\n\n.stat {\n  font-size: 14px;\n  color: #26334A;\n  background: #EEF2FC;\n  border: 1px solid #E1E8F8;\n  border-radius: 999px;\n  padding: 5px 14px;\n}\n\n.stat strong {\n  color: #4361D8;\n  font-weight: 700;\n  margin-left: 2px;\n}\n\n.field-label {\n  margin: 0 0 10px;\n  font-size: 14px;\n  font-weight: 600;\n  color: #6B7891;\n  letter-spacing: .3px;\n}\n\n.composer-row {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n}\n\n.composer-row input[type='text'] {\n  flex: 1 1 260px;\n  min-width: 0;\n  padding: 12px 16px;\n  font-size: 16px;\n  font-family: inherit;\n  color: #26334A;\n  background: #FBFCFE;\n  border: 1px solid #DCE3F0;\n  border-radius: 10px;\n}\n\n.composer-row input[type='text']::placeholder,\n.search input::placeholder {\n  color: #9AA6BC;\n}\n\n.btn-primary {\n  flex: 0 0 auto;\n  min-width: 112px;\n  padding: 12px 24px;\n  font-size: 16px;\n  font-family: inherit;\n  font-weight: 600;\n  color: #FFFFFF;\n  background: #4361D8;\n  border: 1px solid #4361D8;\n  border-radius: 10px;\n  cursor: pointer;\n  transition: background-color .15s ease, border-color .15s ease;\n}\n\n.btn-primary:hover:not(:disabled) {\n  background: #3550BE;\n  border-color: #3550BE;\n}\n\n.btn-primary:disabled {\n  opacity: .6;\n  cursor: not-allowed;\n}\n\n.hint {\n  margin: 10px 0 0;\n  font-size: 14px;\n  color: #7C89A0;\n}\n\n.form-error {\n  margin-top: 12px;\n  padding: 9px 12px;\n  font-size: 14px;\n  color: #B03A2E;\n  background: #FDECEA;\n  border: 1px solid #F5C6C0;\n  border-radius: 8px;\n}\n\n.toolbar {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n  align-items: center;\n  justify-content: space-between;\n  margin-bottom: 16px;\n}\n\n.filters {\n  display: inline-flex;\n  gap: 4px;\n  padding: 4px;\n  background: #EEF2FC;\n  border-radius: 10px;\n}\n\n.filter-btn {\n  padding: 8px 16px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #26334A;\n  background: transparent;\n  border: none;\n  border-radius: 8px;\n  cursor: pointer;\n  transition: background-color .15s ease, color .15s ease;\n}\n\n.filter-btn:hover { background: #E2E9FA; }\n\n.filter-btn.active {\n  color: #4361D8;\n  font-weight: 600;\n  background: #FFFFFF;\n  box-shadow: 0 1px 3px rgba(38, 51, 74, .12);\n}\n\n.search input {\n  width: 220px;\n  padding: 10px 14px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #26334A;\n  background: #FBFCFE;\n  border: 1px solid #DCE3F0;\n  border-radius: 10px;\n}\n\ninput:focus-visible,\nbutton:focus-visible {\n  outline: 2px solid #4361D8;\n  outline-offset: 2px;\n}\n\n.alert {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 12px;\n  align-items: center;\n  margin-bottom: 14px;\n  padding: 12px 14px;\n  font-size: 14px;\n  color: #B03A2E;\n  background: #FDECEA;\n  border: 1px solid #F5C6C0;\n  border-radius: 10px;\n}\n\n.alert-text {\n  flex: 1 1 220px;\n  min-width: 0;\n  word-break: break-word;\n}\n\n.alert button {\n  padding: 6px 14px;\n  font-size: 14px;\n  font-family: inherit;\n  color: #B03A2E;\n  background: #FFFFFF;\n  border: 1px solid #E8A9A0;\n  border-radius: 8px;\n  cursor: pointer;\n}\n\n.alert button:hover:not(:disabled) { background: #FBDFDA; }\n\n.alert button:disabled { opacity: .6; cursor: not-allowed; }\n\n.loading {\n  padding: 16px 0;\n  text-align: center;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.spinner {\n  display: inline-block;\n  width: 14px;\n  height: 14px;\n  margin-right: 8px;\n  vertical-align: -2px;\n  border: 2px solid #C9D4EA;\n  border-top-color: #4361D8;\n  border-radius: 50%;\n  animation: spin .8s linear infinite;\n}\n\n@keyframes spin { to { transform: rotate(360deg); } }\n\n.todo-list {\n  list-style: none;\n  margin: 0;\n  padding: 0;\n  display: flex;\n  flex-direction: column;\n}\n\n.todo-item {\n  display: flex;\n  align-items: flex-start;\n  gap: 12px;\n  padding: 14px 4px;\n  border-bottom: 1px solid #EDF1F8;\n}\n\n.todo-item:last-child { border-bottom: none; }\n\n.todo-toggle {\n  flex: 0 0 auto;\n  width: 24px;\n  height: 24px;\n  margin-top: 1px;\n  padding: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  background: #FFFFFF;\n  border: 2px solid #C3CCDF;\n  border-radius: 7px;\n  cursor: pointer;\n  transition: background-color .15s ease, border-color .15s ease;\n}\n\n.todo-toggle:hover:not(:disabled) { border-color: #4361D8; }\n\n.todo-toggle::after {\n  content: '';\n  width: 6px;\n  height: 11px;\n  border-right: 2.5px solid #FFFFFF;\n  border-bottom: 2.5px solid #FFFFFF;\n  transform: rotate(45deg) translate(-1px, -2px);\n  opacity: 0;\n}\n\n.todo-toggle.done {\n  background: #27886D;\n  border-color: #27886D;\n}\n\n.todo-toggle.done::after { opacity: 1; }\n\n.todo-toggle:disabled { cursor: progress; opacity: .55; }\n\n.todo-title {\n  flex: 1 1 auto;\n  min-width: 0;\n  font-size: 16px;\n  word-break: break-word;\n}\n\n.todo-item.is-done .todo-title {\n  color: #8B97AC;\n  text-decoration: line-through;\n}\n\n.todo-status {\n  flex: 0 0 auto;\n  margin-top: 2px;\n  font-size: 14px;\n  color: #6B7891;\n}\n\n.todo-item.is-done .todo-status { color: #27886D; }\n\n.empty {\n  margin: 20px 0 4px;\n  padding: 26px 16px;\n  text-align: center;\n  font-size: 14px;\n  color: #6B7891;\n  background: #FAFBFE;\n  border: 1px dashed #DCE3F0;\n  border-radius: 12px;\n}\n\n@media (max-width: 600px) {\n  .wrap { padding: 20px 14px 48px; gap: 16px; }\n  .card { padding: 18px; border-radius: 14px; }\n  .toolbar { align-items: stretch; }\n  .filters { width: 100%; }\n  .filter-btn { flex: 1 1 auto; }\n  .search { width: 100%; }\n  .search input { width: 100%; }\n  .btn-primary { width: 100%; }\n}\n\u003c/style\u003e\n\u003c/head\u003e\n\u003cbody\u003e\n\u003cdiv class=\"wrap\"\u003e\n  \u003cheader class=\"card hero\"\u003e\n    \u003ch1\u003e今天，做完一件小事。\u003c/h1\u003e\n    \u003cp class=\"subtitle\"\u003e中文办公待办看板 · 数据保存在本地服务\u003c/p\u003e\n    \u003cdiv class=\"stats\"\u003e\n      \u003cspan class=\"stat\"\u003e总数 \u003cstrong id=\"statTotal\"\u003e0\u003c/strong\u003e\u003c/span\u003e\n      \u003cspan class=\"stat\"\u003e已完成 \u003cstrong id=\"statDone\"\u003e0\u003c/strong\u003e\u003c/span\u003e\n    \u003c/div\u003e\n  \u003c/header\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cp class=\"field-label\"\u003e添加待办\u003c/p\u003e\n    \u003cform id=\"composerForm\" class=\"composer-row\" autocomplete=\"off\"\u003e\n      \u003cinput id=\"titleInput\" type=\"text\" placeholder=\"例如：整理周会要点\" aria-label=\"待办标题\"\u003e\n      \u003cbutton id=\"addBtn\" class=\"btn-primary\" type=\"submit\"\u003e添加待办\u003c/button\u003e\n    \u003c/form\u003e\n    \u003cp class=\"hint\"\u003e按回车快速添加 · 标题最多 120 个字符\u003c/p\u003e\n    \u003cdiv id=\"formError\" class=\"form-error\" role=\"alert\" hidden\u003e\u003c/div\u003e\n  \u003c/section\u003e\n\n  \u003csection class=\"card\"\u003e\n    \u003cdiv class=\"toolbar\"\u003e\n      \u003cdiv class=\"filters\" role=\"group\" aria-label=\"筛选待办\"\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn active\" data-filter=\"all\" aria-pressed=\"true\"\u003e全部\u003c/button\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn\" data-filter=\"active\" aria-pressed=\"false\"\u003e进行中\u003c/button\u003e\n        \u003cbutton type=\"button\" class=\"filter-btn\" data-filter=\"done\" aria-pressed=\"false\"\u003e已完成\u003c/button\u003e\n      \u003c/div\u003e\n      \u003cdiv class=\"search\"\u003e\n        \u003cinput id=\"searchInput\" type=\"search\" placeholder=\"搜索待办\" aria-label=\"搜索待办\"\u003e\n      \u003c/div\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"loadError\" class=\"alert\" role=\"alert\" hidden\u003e\n      \u003cspan id=\"loadErrorText\" class=\"alert-text\"\u003e\u003c/span\u003e\n      \u003cbutton id=\"retryBtn\" type=\"button\"\u003e重试\u003c/button\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"listError\" class=\"alert\" role=\"alert\" hidden\u003e\n      \u003cspan id=\"listErrorText\" class=\"alert-text\"\u003e\u003c/span\u003e\n      \u003cbutton id=\"dismissErrorBtn\" type=\"button\"\u003e知道了\u003c/button\u003e\n    \u003c/div\u003e\n\n    \u003cdiv id=\"loadingState\" class=\"loading\" hidden\u003e\n      \u003cspan class=\"spinner\" aria-hidden=\"true\"\u003e\u003c/span\u003e正在加载待办…\n    \u003c/div\u003e\n\n    \u003cul id=\"todoList\" class=\"todo-list\"\u003e\u003c/ul\u003e\n    \u003cp id=\"emptyState\" class=\"empty\" hidden\u003e\u003c/p\u003e\n  \u003c/section\u003e\n\u003c/div\u003e\n\u003cscript\u003e\n(function () {\n  'use strict';\n\n  var MAX_TITLE_LENGTH = 120;\n  var REQUEST_TIMEOUT = 10000;\n\n  var state = {\n    items: [],\n    filter: 'all',\n    query: '',\n    loading: true,\n    loadError: '',\n    listError: '',\n    submitting: false,\n    pendingIds: new Set(),\n    focusId: null\n  };\n\n  var el = {};\n\n  function byId(id) {\n    return document.getElementById(id);\n  }\n\n  function normalizeItem(raw) {\n    if (!raw || typeof raw !== 'object') return null;\n    if (typeof raw.id !== 'number' || !isFinite(raw.id)) return null;\n    if (typeof raw.title !== 'string') return null;\n    return { id: raw.id, title: raw.title, done: raw.done === true };\n  }\n\n  async function request(url, options) {\n    var opts = {};\n    if (options) {\n      for (var key in options) {\n        if (Object.prototype.hasOwnProperty.call(options, key)) opts[key] = options[key];\n      }\n    }\n    opts.headers = Object.assign({ Accept: 'application/json' }, opts.headers || {});\n\n    var controller = typeof AbortController === 'function' ? new AbortController() : null;\n    var timer = null;\n    if (controller) {\n      opts.signal = controller.signal;\n      timer = setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT);\n    }\n\n    var res;\n    var text;\n    try {\n      res = await fetch(url, opts);\n      text = await res.text();\n    } catch (err) {\n      if (timer) clearTimeout(timer);\n      if (err \u0026\u0026 err.name === 'AbortError') throw new Error('请求超时，请稍后重试。');\n      throw new Error('无法连接后端服务，请确认服务已启动后重试。');\n    }\n    if (timer) clearTimeout(timer);\n\n    var data = null;\n    if (text) {\n      try { data = JSON.parse(text); } catch (e) { data = null; }\n    }\n\n    if (!res.ok) {\n      var message = data \u0026\u0026 (data.error || data.message)\n        ? String(data.error || data.message)\n        : '请求失败（HTTP ' + res.status + '）';\n      var httpError = new Error(message);\n      httpError.status = res.status;\n      throw httpError;\n    }\n\n    if (data === null) throw new Error('服务器返回了无法解析的数据。');\n    return data;\n  }\n\n  function apiHealth() {\n    return request('./api/health');\n  }\n\n  function apiList() {\n    return request('./api/todos');\n  }\n\n  function apiCreate(title) {\n    return request('./api/todos', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ title: title })\n    });\n  }\n\n  function apiUpdate(id, done) {\n    return request('./api/todos/' + encodeURIComponent(String(id)), {\n      method: 'PATCH',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ done: done })\n    });\n  }\n\n  async function loadTodos() {\n    state.loading = true;\n    state.loadError = '';\n    render();\n    try {\n      var health = await apiHealth();\n      if (!health || health.ok !== true) throw new Error('后端健康检查未通过，请稍后重试。');\n\n      var data = await apiList();\n      if (!data || !Array.isArray(data.items)) throw new Error('待办数据格式异常。');\n\n      var items = [];\n      for (var i = 0; i \u003c data.items.length; i++) {\n        var item = normalizeItem(data.items[i]);\n        if (!item) throw new Error('待办数据格式异常。');\n        items.push(item);\n      }\n      state.items = items;\n      state.listError = '';\n    } catch (err) {\n      state.loadError = err \u0026\u0026 err.message ? err.message : '加载失败，请重试。';\n    } finally {\n      state.loading = false;\n      render();\n    }\n  }\n\n  async function addTodo(rawTitle) {\n    if (state.submitting) return;\n\n    var title = String(rawTitle == null ? '' : rawTitle).trim();\n    if (!title) {\n      showFormError('请输入待办标题。');\n      return;\n    }\n    if (Array.from(title).length \u003e MAX_TITLE_LENGTH) {\n      showFormError('标题不能超过 ' + MAX_TITLE_LENGTH + ' 个字符。');\n      return;\n    }\n\n    clearFormError();\n    state.submitting = true;\n    renderComposer();\n\n    try {\n      var data = await apiCreate(title);\n      var item = normalizeItem(data \u0026\u0026 data.item);\n      if (!item) throw new Error('服务器返回的待办数据格式异常。');\n      state.items.push(item);\n      if (state.filter === 'done') state.filter = 'all';\n      el.input.value = '';\n      state.listError = '';\n    } catch (err) {\n      showFormError(err \u0026\u0026 err.message ? err.message : '添加失败，请重试。');\n    } finally {\n      state.submitting = false;\n      render();\n      el.input.focus();\n    }\n  }\n\n  async function toggleTodo(id) {\n    if (state.pendingIds.has(id)) return;\n\n    var target = null;\n    for (var i = 0; i \u003c state.items.length; i++) {\n      if (state.items[i].id === id) { target = state.items[i]; break; }\n    }\n    if (!target) return;\n\n    state.pendingIds.add(id);\n    renderList();\n\n    try {\n      var data = await apiUpdate(id, !target.done);\n      var updated = normalizeItem(data \u0026\u0026 data.item);\n      if (!updated) throw new Error('服务器返回的待办数据格式异常。');\n      for (var j = 0; j \u003c state.items.length; j++) {\n        if (state.items[j].id === updated.id) { state.items[j] = updated; break; }\n      }\n      state.listError = '';\n    } catch (err) {\n      state.listError = '更新「' + target.title + '」失败：' + (err \u0026\u0026 err.message ? err.message : '请重试。');\n    } finally {\n      state.pendingIds.delete(id);\n      state.focusId = id;\n      render();\n    }\n  }\n\n  function filterItems() {\n    var q = state.query.trim().toLowerCase();\n    return state.items.filter(function (item) {\n      if (state.filter === 'active' \u0026\u0026 item.done) return false;\n      if (state.filter === 'done' \u0026\u0026 !item.done) return false;\n      if (q !== '' \u0026\u0026 item.title.toLowerCase().indexOf(q) === -1) return false;\n      return true;\n    });\n  }\n\n  function buildItem(item) {\n    var li = document.createElement('li');\n    li.className = 'todo-item' + (item.done ? ' is-done' : '');\n\n    var pending = state.pendingIds.has(item.id);\n\n    var toggle = document.createElement('button');\n    toggle.type = 'button';\n    toggle.className = 'todo-toggle' + (item.done ? ' done' : '');\n    toggle.setAttribute('data-id', String(item.id));\n    toggle.setAttribute('aria-pressed', item.done ? 'true' : 'false');\n    toggle.setAttribute('aria-label', (item.done ? '标记为未完成：' : '标记为已完成：') + item.title);\n    if (pending) toggle.disabled = true;\n    toggle.addEventListener('click', function () { toggleTodo(item.id); });\n\n    var title = document.createElement('span');\n    title.className = 'todo-title';\n    title.textContent = item.title;\n\n    var status = document.createElement('span');\n    status.className = 'todo-status';\n    status.textContent = pending ? '保存中…' : (item.done ? '已完成' : '进行中');\n\n    li.appendChild(toggle);\n    li.appendChild(title);\n    li.appendChild(status);\n    return li;\n  }\n\n  function renderStats() {\n    var done = 0;\n    for (var i = 0; i \u003c state.items.length; i++) {\n      if (state.items[i].done) done++;\n    }\n    el.statTotal.textContent = String(state.items.length);\n    el.statDone.textContent = String(done);\n  }\n\n  function renderFilters() {\n    for (var i = 0; i \u003c el.filterBtns.length; i++) {\n      var btn = el.filterBtns[i];\n      var active = btn.getAttribute('data-filter') === state.filter;\n      btn.classList.toggle('active', active);\n      btn.setAttribute('aria-pressed', active ? 'true' : 'false');\n    }\n  }\n\n  function renderComposer() {\n    el.addBtn.disabled = state.submitting;\n    el.addBtn.textContent = state.submitting ? '添加中…' : '添加待办';\n  }\n\n  function renderStatus() {\n    el.loading.hidden = !state.loading;\n\n    var hasLoadError = !state.loading \u0026\u0026 !!state.loadError;\n    el.loadError.hidden = !hasLoadError;\n    if (hasLoadError) el.loadErrorText.textContent = state.loadError;\n    el.retryBtn.disabled = state.loading;\n\n    var hasListError = !!state.listError;\n    el.listError.hidden = !hasListError;\n    if (hasListError) el.listErrorText.textContent = state.listError;\n  }\n\n  function renderList() {\n    el.list.textContent = '';\n\n    var visible = filterItems();\n    for (var i = 0; i \u003c visible.length; i++) {\n      el.list.appendChild(buildItem(visible[i]));\n    }\n\n    var showEmpty = !state.loading \u0026\u0026 !state.loadError \u0026\u0026 visible.length === 0;\n    el.empty.hidden = !showEmpty;\n    if (showEmpty) {\n      if (state.items.length === 0) {\n        el.empty.textContent = '还没有待办，先写下今天要做的第一件小事吧。';\n      } else if (state.query.trim() !== '') {\n        el.empty.textContent = '没有找到匹配的待办，换个关键词试试。';\n      } else if (state.filter === 'active') {\n        el.empty.textContent = '进行中的待办已清空，全部完成。';\n      } else if (state.filter === 'done') {\n        el.empty.textContent = '还没有已完成的待办。';\n      } else {\n        el.empty.textContent = '暂无待办。';\n      }\n    }\n\n    if (state.focusId !== null) {\n      var target = el.list.querySelector('.todo-toggle[data-id=\"' + state.focusId + '\"]');\n      if (target \u0026\u0026 typeof target.focus === 'function') target.focus();\n      state.focusId = null;\n    }\n  }\n\n  function render() {\n    renderStats();\n    renderFilters();\n    renderComposer();\n    renderStatus();\n    renderList();\n  }\n\n  function showFormError(message) {\n    el.formError.textContent = message;\n    el.formError.hidden = false;\n  }\n\n  function clearFormError() {\n    el.formError.textContent = '';\n    el.formError.hidden = true;\n  }\n\n  function bindEvents() {\n    el.form.addEventListener('submit', function (event) {\n      event.preventDefault();\n      addTodo(el.input.value);\n    });\n\n    el.input.addEventListener('input', function () {\n      if (!el.formError.hidden) clearFormError();\n    });\n\n    el.search.addEventListener('input', function () {\n      state.query = el.search.value;\n      renderList();\n    });\n\n    el.filterBtns.forEach(function (btn) {\n      btn.addEventListener('click', function () {\n        var next = btn.getAttribute('data-filter');\n        if (next !== 'all' \u0026\u0026 next !== 'active' \u0026\u0026 next !== 'done') return;\n        if (state.filter === next) return;\n        state.filter = next;\n        renderFilters();\n        renderList();\n      });\n    });\n\n    el.retryBtn.addEventListener('click', function () {\n      if (state.loading) return;\n      loadTodos();\n    });\n\n    el.dismissErrorBtn.addEventListener('click', function () {\n      state.listError = '';\n      renderStatus();\n    });\n  }\n\n  function init() {\n    el.form = byId('composerForm');\n    el.input = byId('titleInput');\n    el.addBtn = byId('addBtn');\n    el.formError = byId('formError');\n    el.search = byId('searchInput');\n    el.list = byId('todoList');\n    el.empty = byId('emptyState');\n    el.loading = byId('loadingState');\n    el.loadError = byId('loadError');\n    el.loadErrorText = byId('loadErrorText');\n    el.retryBtn = byId('retryBtn');\n    el.listError = byId('listError');\n    el.listErrorText = byId('listErrorText');\n    el.dismissErrorBtn = byId('dismissErrorBtn');\n    el.statTotal = byId('statTotal');\n    el.statDone = byId('statDone');\n    el.filterBtns = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));\n\n    bindEvents();\n    render();\n    loadTodos();\n  }\n\n  init();\n})();\n\u003c/script\u003e\n\u003c/body\u003e\n\u003c/html\u003e\n"
+          },
+          {
+            "path": "main.go",
+            "content": "package main\n\nimport (\n    \"encoding/json\"\n    \"errors\"\n    \"io\"\n    \"log\"\n    \"mime\"\n    \"net\"\n    \"net/http\"\n    \"os\"\n    \"path/filepath\"\n    \"strconv\"\n    \"strings\"\n    \"sync\"\n    \"time\"\n    \"unicode/utf8\"\n)\n\nconst (\n    defaultPort   = \"18086\"\n    dataFilePath  = \"data/todos.json\"\n    indexFilePath = \"index.html\"\n    maxBodyBytes  = 16 \u003c\u003c 10\n    maxTitleRunes = 120\n)\n\ntype Todo struct {\n    ID    int    `json:\"id\"`\n    Title string `json:\"title\"`\n    Done  bool   `json:\"done\"`\n}\n\ntype Store struct {\n    mu     sync.RWMutex\n    path   string\n    items  []Todo\n    nextID int\n}\n\nvar errTodoNotFound = errors.New(\"todo not found\")\n\nfunc NewStore(path string) (*Store, error) {\n    if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {\n        return nil, err\n    }\n\n    data, err := os.ReadFile(path)\n    if errors.Is(err, os.ErrNotExist) {\n        store := \u0026Store{\n            path:   path,\n            items:  make([]Todo, 0),\n            nextID: 1,\n        }\n        if err := writeTodosFile(path, store.items); err != nil {\n            return nil, err\n        }\n        return store, nil\n    }\n    if err != nil {\n        return nil, err\n    }\n\n    var items []Todo\n    if err := json.Unmarshal(data, \u0026items); err != nil {\n        return nil, err\n    }\n    if items == nil {\n        items = make([]Todo, 0)\n    }\n\n    maxID := 0\n    for _, item := range items {\n        if item.ID \u003e maxID {\n            maxID = item.ID\n        }\n    }\n\n    return \u0026Store{\n        path:   path,\n        items:  items,\n        nextID: maxID + 1,\n    }, nil\n}\n\nfunc writeTodosFile(path string, items []Todo) error {\n    data, err := json.MarshalIndent(items, \"\", \"  \")\n    if err != nil {\n        return err\n    }\n    data = append(data, '\\n')\n\n    dir := filepath.Dir(path)\n    tmp, err := os.CreateTemp(dir, \".todos-*.tmp\")\n    if err != nil {\n        return err\n    }\n    tmpName := tmp.Name()\n    cleanup := func() {\n        _ = os.Remove(tmpName)\n    }\n\n    if _, err := tmp.Write(data); err != nil {\n        _ = tmp.Close()\n        cleanup()\n        return err\n    }\n    if err := tmp.Sync(); err != nil {\n        _ = tmp.Close()\n        cleanup()\n        return err\n    }\n    if err := tmp.Close(); err != nil {\n        cleanup()\n        return err\n    }\n    if err := os.Rename(tmpName, path); err != nil {\n        cleanup()\n        return err\n    }\n    return nil\n}\n\nfunc (s *Store) List() []Todo {\n    s.mu.RLock()\n    defer s.mu.RUnlock()\n\n    out := make([]Todo, len(s.items))\n    copy(out, s.items)\n    return out\n}\n\nfunc (s *Store) Add(title string) (Todo, error) {\n    s.mu.Lock()\n    defer s.mu.Unlock()\n\n    oldItems := s.items\n    oldNextID := s.nextID\n    item := Todo{\n        ID:    s.nextID,\n        Title: title,\n        Done:  false,\n    }\n\n    s.items = append(s.items, item)\n    s.nextID++\n\n    if err := writeTodosFile(s.path, s.items); err != nil {\n        s.items = oldItems\n        s.nextID = oldNextID\n        return Todo{}, err\n    }\n    return item, nil\n}\n\nfunc (s *Store) SetDone(id int, done bool) (Todo, error) {\n    s.mu.Lock()\n    defer s.mu.Unlock()\n\n    for i := range s.items {\n        if s.items[i].ID != id {\n            continue\n        }\n\n        oldItem := s.items[i]\n        s.items[i].Done = done\n        if err := writeTodosFile(s.path, s.items); err != nil {\n            s.items[i] = oldItem\n            return Todo{}, err\n        }\n        return s.items[i], nil\n    }\n    return Todo{}, errTodoNotFound\n}\n\ntype server struct {\n    store     *Store\n    indexPath string\n}\n\ntype itemsResponse struct {\n    Items []Todo `json:\"items\"`\n}\n\ntype itemResponse struct {\n    Item Todo `json:\"item\"`\n}\n\ntype errorResponse struct {\n    Error string `json:\"error\"`\n}\n\nfunc (s *server) routes() http.Handler {\n    mux := http.NewServeMux()\n    mux.HandleFunc(\"/api/health\", s.handleHealth)\n    mux.HandleFunc(\"/api/todos\", s.handleTodos)\n    mux.HandleFunc(\"/api/todos/\", s.handleTodoByID)\n    mux.HandleFunc(\"/\", s.handleIndex)\n    return mux\n}\n\nfunc (s *server) handleHealth(w http.ResponseWriter, r *http.Request) {\n    if r.Method != http.MethodGet {\n        methodNotAllowed(w, http.MethodGet)\n        return\n    }\n    writeJSON(w, http.StatusOK, struct {\n        OK bool `json:\"ok\"`\n    }{OK: true})\n}\n\nfunc (s *server) handleTodos(w http.ResponseWriter, r *http.Request) {\n    switch r.Method {\n    case http.MethodGet:\n        writeJSON(w, http.StatusOK, itemsResponse{Items: s.store.List()})\n    case http.MethodPost:\n        s.handleCreateTodo(w, r)\n    default:\n        methodNotAllowed(w, \"GET, POST\")\n    }\n}\n\nfunc (s *server) handleCreateTodo(w http.ResponseWriter, r *http.Request) {\n    if !hasJSONContentType(r) {\n        writeError(w, http.StatusUnsupportedMediaType, \"Content-Type 必须为 application/json\")\n        return\n    }\n\n    var req struct {\n        Title string `json:\"title\"`\n    }\n    if !decodeJSONBody(w, r, \u0026req) {\n        return\n    }\n\n    title := strings.TrimSpace(req.Title)\n    if title == \"\" {\n        writeError(w, http.StatusBadRequest, \"标题不能为空\")\n        return\n    }\n    if utf8.RuneCountInString(title) \u003e maxTitleRunes {\n        writeError(w, http.StatusBadRequest, \"标题不能超过120个Unicode字符\")\n        return\n    }\n\n    item, err := s.store.Add(title)\n    if err != nil {\n        log.Printf(\"保存新增待办失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"保存待办数据失败，请稍后重试\")\n        return\n    }\n    writeJSON(w, http.StatusCreated, itemResponse{Item: item})\n}\n\nfunc (s *server) handleTodoByID(w http.ResponseWriter, r *http.Request) {\n    if r.Method != http.MethodPatch {\n        methodNotAllowed(w, http.MethodPatch)\n        return\n    }\n\n    rawID := strings.TrimPrefix(r.URL.Path, \"/api/todos/\")\n    if rawID == \"\" || strings.Contains(rawID, \"/\") {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n    id, err := strconv.Atoi(rawID)\n    if err != nil || id \u003c= 0 {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n\n    if !hasJSONContentType(r) {\n        writeError(w, http.StatusUnsupportedMediaType, \"Content-Type 必须为 application/json\")\n        return\n    }\n\n    var req struct {\n        Done *bool `json:\"done\"`\n    }\n    if !decodeJSONBody(w, r, \u0026req) {\n        return\n    }\n    if req.Done == nil {\n        writeError(w, http.StatusBadRequest, \"done 字段必须是布尔值\")\n        return\n    }\n\n    item, err := s.store.SetDone(id, *req.Done)\n    if errors.Is(err, errTodoNotFound) {\n        writeError(w, http.StatusNotFound, \"待办不存在\")\n        return\n    }\n    if err != nil {\n        log.Printf(\"保存待办状态失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"保存待办数据失败，请稍后重试\")\n        return\n    }\n    writeJSON(w, http.StatusOK, itemResponse{Item: item})\n}\n\nfunc (s *server) handleIndex(w http.ResponseWriter, r *http.Request) {\n    if r.URL.Path != \"/\" {\n        writeError(w, http.StatusNotFound, \"页面不存在\")\n        return\n    }\n    if r.Method != http.MethodGet {\n        methodNotAllowed(w, http.MethodGet)\n        return\n    }\n\n    data, err := os.ReadFile(s.indexPath)\n    if err != nil {\n        log.Printf(\"读取 index.html 失败: %v\", err)\n        writeError(w, http.StatusInternalServerError, \"读取首页失败\")\n        return\n    }\n\n    w.Header().Set(\"Content-Type\", \"text/html; charset=utf-8\")\n    w.Header().Set(\"Cache-Control\", \"no-store\")\n    w.WriteHeader(http.StatusOK)\n    _, _ = w.Write(data)\n}\n\nfunc hasJSONContentType(r *http.Request) bool {\n    raw := strings.TrimSpace(r.Header.Get(\"Content-Type\"))\n    if raw == \"\" {\n        return true\n    }\n    mediaType, _, err := mime.ParseMediaType(raw)\n    if err != nil {\n        return false\n    }\n    return strings.EqualFold(mediaType, \"application/json\")\n}\n\nfunc decodeJSONBody(w http.ResponseWriter, r *http.Request, dst any) bool {\n    r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)\n    decoder := json.NewDecoder(r.Body)\n    decoder.DisallowUnknownFields()\n\n    if err := decoder.Decode(dst); err != nil {\n        if isBodyTooLarge(err) {\n            writeError(w, http.StatusRequestEntityTooLarge, \"请求体过大\")\n        } else {\n            writeError(w, http.StatusBadRequest, \"请求体必须是合法的 JSON 对象\")\n        }\n        return false\n    }\n\n    var extra any\n    if err := decoder.Decode(\u0026extra); err != io.EOF {\n        if err == nil {\n            writeError(w, http.StatusBadRequest, \"请求体只能包含一个 JSON 对象\")\n        } else if isBodyTooLarge(err) {\n            writeError(w, http.StatusRequestEntityTooLarge, \"请求体过大\")\n        } else {\n            writeError(w, http.StatusBadRequest, \"请求体包含无效的 JSON 内容\")\n        }\n        return false\n    }\n    return true\n}\n\nfunc isBodyTooLarge(err error) bool {\n    var maxBytesError *http.MaxBytesError\n    return errors.As(err, \u0026maxBytesError)\n}\n\nfunc methodNotAllowed(w http.ResponseWriter, allow string) {\n    w.Header().Set(\"Allow\", allow)\n    writeError(w, http.StatusMethodNotAllowed, \"请求方法不允许\")\n}\n\nfunc writeError(w http.ResponseWriter, status int, message string) {\n    writeJSON(w, status, errorResponse{Error: message})\n}\n\nfunc writeJSON(w http.ResponseWriter, status int, payload any) {\n    w.Header().Set(\"Content-Type\", \"application/json; charset=utf-8\")\n    w.Header().Set(\"Cache-Control\", \"no-store\")\n    w.WriteHeader(status)\n    if err := json.NewEncoder(w).Encode(payload); err != nil {\n        log.Printf(\"写入 JSON 响应失败: %v\", err)\n    }\n}\n\nfunc main() {\n    port := strings.TrimSpace(os.Getenv(\"PORT\"))\n    if port == \"\" {\n        port = defaultPort\n    }\n    portNumber, err := strconv.Atoi(port)\n    if err != nil || portNumber \u003c 1 || portNumber \u003e 65535 {\n        log.Fatalf(\"无效的 PORT 环境变量: %q\", port)\n    }\n\n    store, err := NewStore(dataFilePath)\n    if err != nil {\n        log.Fatalf(\"初始化待办数据失败: %v\", err)\n    }\n\n    app := \u0026server{store: store, indexPath: indexFilePath}\n    addr := net.JoinHostPort(\"127.0.0.1\", port)\n    listener, err := net.Listen(\"tcp\", addr)\n    if err != nil {\n        log.Fatalf(\"监听 %s 失败: %v\", addr, err)\n    }\n\n    httpServer := \u0026http.Server{\n        Handler:           app.routes(),\n        ReadHeaderTimeout: 5 * time.Second,\n        IdleTimeout:       60 * time.Second,\n    }\n\n    log.Printf(\"中文办公待办看板服务正在运行: http://%s\", listener.Addr().String())\n    if err := httpServer.Serve(listener); err != nil \u0026\u0026 !errors.Is(err, http.ErrServerClosed) {\n        log.Fatalf(\"HTTP 服务异常退出: %v\", err)\n    }\n}\n"
+          },
+          {
+            "path": "go.mod",
+            "content": "module opsbuddy-todo-demo\n\ngo 1.22\n"
+          }
+        ]
+      }
+    }
+  ]
+}

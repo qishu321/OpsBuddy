@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>今天，做完一件小事。 · 办公待办看板</title>
+<style>
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html,
+body { margin: 0; padding: 0; }
+
+body {
+  background: #F6F8FC;
+  color: #26334A;
+  font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+[hidden] { display: none !important; }
+
+.wrap {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E4EAF5;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(38, 51, 74, 0.06);
+  padding: 24px;
+}
+
+.hero h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: .5px;
+  color: #26334A;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #6B7891;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.stat {
+  font-size: 14px;
+  color: #26334A;
+  background: #EEF2FC;
+  border: 1px solid #E1E8F8;
+  border-radius: 999px;
+  padding: 5px 14px;
+}
+
+.stat strong {
+  color: #4361D8;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.field-label {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6B7891;
+  letter-spacing: .3px;
+}
+
+.composer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.composer-row input[type='text'] {
+  flex: 1 1 260px;
+  min-width: 0;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-family: inherit;
+  color: #26334A;
+  background: #FBFCFE;
+  border: 1px solid #DCE3F0;
+  border-radius: 10px;
+}
+
+.composer-row input[type='text']::placeholder,
+.search input::placeholder {
+  color: #9AA6BC;
+}
+
+.btn-primary {
+  flex: 0 0 auto;
+  min-width: 112px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #FFFFFF;
+  background: #4361D8;
+  border: 1px solid #4361D8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #3550BE;
+  border-color: #3550BE;
+}
+
+.btn-primary:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.hint {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: #7C89A0;
+}
+
+.form-error {
+  margin-top: 12px;
+  padding: 9px 12px;
+  font-size: 14px;
+  color: #B03A2E;
+  background: #FDECEA;
+  border: 1px solid #F5C6C0;
+  border-radius: 8px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.filters {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  background: #EEF2FC;
+  border-radius: 10px;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #26334A;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color .15s ease, color .15s ease;
+}
+
+.filter-btn:hover { background: #E2E9FA; }
+
+.filter-btn.active {
+  color: #4361D8;
+  font-weight: 600;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(38, 51, 74, .12);
+}
+
+.search input {
+  width: 220px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #26334A;
+  background: #FBFCFE;
+  border: 1px solid #DCE3F0;
+  border-radius: 10px;
+}
+
+input:focus-visible,
+button:focus-visible {
+  outline: 2px solid #4361D8;
+  outline-offset: 2px;
+}
+
+.alert {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #B03A2E;
+  background: #FDECEA;
+  border: 1px solid #F5C6C0;
+  border-radius: 10px;
+}
+
+.alert-text {
+  flex: 1 1 220px;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.alert button {
+  padding: 6px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #B03A2E;
+  background: #FFFFFF;
+  border: 1px solid #E8A9A0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.alert button:hover:not(:disabled) { background: #FBDFDA; }
+
+.alert button:disabled { opacity: .6; cursor: not-allowed; }
+
+.loading {
+  padding: 16px 0;
+  text-align: center;
+  font-size: 14px;
+  color: #6B7891;
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  border: 2px solid #C9D4EA;
+  border-top-color: #4361D8;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.todo-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 4px;
+  border-bottom: 1px solid #EDF1F8;
+}
+
+.todo-item:last-child { border-bottom: none; }
+
+.todo-toggle {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #FFFFFF;
+  border: 2px solid #C3CCDF;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.todo-toggle:hover:not(:disabled) { border-color: #4361D8; }
+
+.todo-toggle::after {
+  content: '';
+  width: 6px;
+  height: 11px;
+  border-right: 2.5px solid #FFFFFF;
+  border-bottom: 2.5px solid #FFFFFF;
+  transform: rotate(45deg) translate(-1px, -2px);
+  opacity: 0;
+}
+
+.todo-toggle.done {
+  background: #27886D;
+  border-color: #27886D;
+}
+
+.todo-toggle.done::after { opacity: 1; }
+
+.todo-toggle:disabled { cursor: progress; opacity: .55; }
+
+.todo-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 16px;
+  word-break: break-word;
+}
+
+.todo-item.is-done .todo-title {
+  color: #8B97AC;
+  text-decoration: line-through;
+}
+
+.todo-status {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  font-size: 14px;
+  color: #6B7891;
+}
+
+.todo-item.is-done .todo-status { color: #27886D; }
+
+.empty {
+  margin: 20px 0 4px;
+  padding: 26px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: #6B7891;
+  background: #FAFBFE;
+  border: 1px dashed #DCE3F0;
+  border-radius: 12px;
+}
+
+@media (max-width: 600px) {
+  .wrap { padding: 20px 14px 48px; gap: 16px; }
+  .card { padding: 18px; border-radius: 14px; }
+  .toolbar { align-items: stretch; }
+  .filters { width: 100%; }
+  .filter-btn { flex: 1 1 auto; }
+  .search { width: 100%; }
+  .search input { width: 100%; }
+  .btn-primary { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="card hero">
+    <h1>今天，做完一件小事。</h1>
+    <p class="subtitle">中文办公待办看板 · 数据保存在本地服务</p>
+    <div class="stats">
+      <span class="stat">总数 <strong id="statTotal">0</strong></span>
+      <span class="stat">已完成 <strong id="statDone">0</strong></span>
+    </div>
+  </header>
+
+  <section class="card">
+    <p class="field-label">添加待办</p>
+    <form id="composerForm" class="composer-row" autocomplete="off">
+      <input id="titleInput" type="text" placeholder="例如：整理周会要点" aria-label="待办标题">
+      <button id="addBtn" class="btn-primary" type="submit">添加待办</button>
+    </form>
+    <p class="hint">按回车快速添加 · 标题最多 120 个字符</p>
+    <div id="formError" class="form-error" role="alert" hidden></div>
+  </section>
+
+  <section class="card">
+    <div class="toolbar">
+      <div class="filters" role="group" aria-label="筛选待办">
+        <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">全部</button>
+        <button type="button" class="filter-btn" data-filter="active" aria-pressed="false">进行中</button>
+        <button type="button" class="filter-btn" data-filter="done" aria-pressed="false">已完成</button>
+      </div>
+      <div class="search">
+        <input id="searchInput" type="search" placeholder="搜索待办" aria-label="搜索待办">
+      </div>
+    </div>
+
+    <div id="loadError" class="alert" role="alert" hidden>
+      <span id="loadErrorText" class="alert-text"></span>
+      <button id="retryBtn" type="button">重试</button>
+    </div>
+
+    <div id="listError" class="alert" role="alert" hidden>
+      <span id="listErrorText" class="alert-text"></span>
+      <button id="dismissErrorBtn" type="button">知道了</button>
+    </div>
+
+    <div id="loadingState" class="loading" hidden>
+      <span class="spinner" aria-hidden="true"></span>正在加载待办…
+    </div>
+
+    <ul id="todoList" class="todo-list"></ul>
+    <p id="emptyState" class="empty" hidden></p>
+  </section>
+</div>
+<script>
+(function () {
+  'use strict';
+
+  var MAX_TITLE_LENGTH = 120;
+  var REQUEST_TIMEOUT = 10000;
+
+  var state = {
+    items: [],
+    filter: 'all',
+    query: '',
+    loading: true,
+    loadError: '',
+    listError: '',
+    submitting: false,
+    pendingIds: new Set(),
+    focusId: null
+  };
+
+  var el = {};
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function normalizeItem(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    if (typeof raw.id !== 'number' || !isFinite(raw.id)) return null;
+    if (typeof raw.title !== 'string') return null;
+    return { id: raw.id, title: raw.title, done: raw.done === true };
+  }
+
+  async function request(url, options) {
+    var opts = {};
+    if (options) {
+      for (var key in options) {
+        if (Object.prototype.hasOwnProperty.call(options, key)) opts[key] = options[key];
+      }
+    }
+    opts.headers = Object.assign({ Accept: 'application/json' }, opts.headers || {});
+
+    var controller = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = null;
+    if (controller) {
+      opts.signal = controller.signal;
+      timer = setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT);
+    }
+
+    var res;
+    var text;
+    try {
+      res = await fetch(url, opts);
+      text = await res.text();
+    } catch (err) {
+      if (timer) clearTimeout(timer);
+      if (err && err.name === 'AbortError') throw new Error('请求超时，请稍后重试。');
+      throw new Error('无法连接后端服务，请确认服务已启动后重试。');
+    }
+    if (timer) clearTimeout(timer);
+
+    var data = null;
+    if (text) {
+      try { data = JSON.parse(text); } catch (e) { data = null; }
+    }
+
+    if (!res.ok) {
+      var message = data && (data.error || data.message)
+        ? String(data.error || data.message)
+        : '请求失败（HTTP ' + res.status + '）';
+      var httpError = new Error(message);
+      httpError.status = res.status;
+      throw httpError;
+    }
+
+    if (data === null) throw new Error('服务器返回了无法解析的数据。');
+    return data;
+  }
+
+  function apiHealth() {
+    return request('./api/health');
+  }
+
+  function apiList() {
+    return request('./api/todos');
+  }
+
+  function apiCreate(title) {
+    return request('./api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: title })
+    });
+  }
+
+  function apiUpdate(id, done) {
+    return request('./api/todos/' + encodeURIComponent(String(id)), {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ done: done })
+    });
+  }
+
+  async function loadTodos() {
+    state.loading = true;
+    state.loadError = '';
+    render();
+    try {
+      var health = await apiHealth();
+      if (!health || health.ok !== true) throw new Error('后端健康检查未通过，请稍后重试。');
+
+      var data = await apiList();
+      if (!data || !Array.isArray(data.items)) throw new Error('待办数据格式异常。');
+
+      var items = [];
+      for (var i = 0; i < data.items.length; i++) {
+        var item = normalizeItem(data.items[i]);
+        if (!item) throw new Error('待办数据格式异常。');
+        items.push(item);
+      }
+      state.items = items;
+      state.listError = '';
+    } catch (err) {
+      state.loadError = err && err.message ? err.message : '加载失败，请重试。';
+    } finally {
+      state.loading = false;
+      render();
+    }
+  }
+
+  async function addTodo(rawTitle) {
+    if (state.submitting) return;
+
+    var title = String(rawTitle == null ? '' : rawTitle).trim();
+    if (!title) {
+      showFormError('请输入待办标题。');
+      return;
+    }
+    if (Array.from(title).length > MAX_TITLE_LENGTH) {
+      showFormError('标题不能超过 ' + MAX_TITLE_LENGTH + ' 个字符。');
+      return;
+    }
+
+    clearFormError();
+    state.submitting = true;
+    renderComposer();
+
+    try {
+      var data = await apiCreate(title);
+      var item = normalizeItem(data && data.item);
+      if (!item) throw new Error('服务器返回的待办数据格式异常。');
+      state.items.push(item);
+      if (state.filter === 'done') state.filter = 'all';
+      el.input.value = '';
+      state.listError = '';
+    } catch (err) {
+      showFormError(err && err.message ? err.message : '添加失败，请重试。');
+    } finally {
+      state.submitting = false;
+      render();
+      el.input.focus();
+    }
+  }
+
+  async function toggleTodo(id) {
+    if (state.pendingIds.has(id)) return;
+
+    var target = null;
+    for (var i = 0; i < state.items.length; i++) {
+      if (state.items[i].id === id) { target = state.items[i]; break; }
+    }
+    if (!target) return;
+
+    state.pendingIds.add(id);
+    renderList();
+
+    try {
+      var data = await apiUpdate(id, !target.done);
+      var updated = normalizeItem(data && data.item);
+      if (!updated) throw new Error('服务器返回的待办数据格式异常。');
+      for (var j = 0; j < state.items.length; j++) {
+        if (state.items[j].id === updated.id) { state.items[j] = updated; break; }
+      }
+      state.listError = '';
+    } catch (err) {
+      state.listError = '更新「' + target.title + '」失败：' + (err && err.message ? err.message : '请重试。');
+    } finally {
+      state.pendingIds.delete(id);
+      state.focusId = id;
+      render();
+    }
+  }
+
+  function filterItems() {
+    var q = state.query.trim().toLowerCase();
+    return state.items.filter(function (item) {
+      if (state.filter === 'active' && item.done) return false;
+      if (state.filter === 'done' && !item.done) return false;
+      if (q !== '' && item.title.toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+  }
+
+  function buildItem(item) {
+    var li = document.createElement('li');
+    li.className = 'todo-item' + (item.done ? ' is-done' : '');
+
+    var pending = state.pendingIds.has(item.id);
+
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'todo-toggle' + (item.done ? ' done' : '');
+    toggle.setAttribute('data-id', String(item.id));
+    toggle.setAttribute('aria-pressed', item.done ? 'true' : 'false');
+    toggle.setAttribute('aria-label', (item.done ? '标记为未完成：' : '标记为已完成：') + item.title);
+    if (pending) toggle.disabled = true;
+    toggle.addEventListener('click', function () { toggleTodo(item.id); });
+
+    var title = document.createElement('span');
+    title.className = 'todo-title';
+    title.textContent = item.title;
+
+    var status = document.createElement('span');
+    status.className = 'todo-status';
+    status.textContent = pending ? '保存中…' : (item.done ? '已完成' : '进行中');
+
+    li.appendChild(toggle);
+    li.appendChild(title);
+    li.appendChild(status);
+    return li;
+  }
+
+  function renderStats() {
+    var done = 0;
+    for (var i = 0; i < state.items.length; i++) {
+      if (state.items[i].done) done++;
+    }
+    el.statTotal.textContent = String(state.items.length);
+    el.statDone.textContent = String(done);
+  }
+
+  function renderFilters() {
+    for (var i = 0; i < el.filterBtns.length; i++) {
+      var btn = el.filterBtns[i];
+      var active = btn.getAttribute('data-filter') === state.filter;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    }
+  }
+
+  function renderComposer() {
+    el.addBtn.disabled = state.submitting;
+    el.addBtn.textContent = state.submitting ? '添加中…' : '添加待办';
+  }
+
+  function renderStatus() {
+    el.loading.hidden = !state.loading;
+
+    var hasLoadError = !state.loading && !!state.loadError;
+    el.loadError.hidden = !hasLoadError;
+    if (hasLoadError) el.loadErrorText.textContent = state.loadError;
+    el.retryBtn.disabled = state.loading;
+
+    var hasListError = !!state.listError;
+    el.listError.hidden = !hasListError;
+    if (hasListError) el.listErrorText.textContent = state.listError;
+  }
+
+  function renderList() {
+    el.list.textContent = '';
+
+    var visible = filterItems();
+    for (var i = 0; i < visible.length; i++) {
+      el.list.appendChild(buildItem(visible[i]));
+    }
+
+    var showEmpty = !state.loading && !state.loadError && visible.length === 0;
+    el.empty.hidden = !showEmpty;
+    if (showEmpty) {
+      if (state.items.length === 0) {
+        el.empty.textContent = '还没有待办，先写下今天要做的第一件小事吧。';
+      } else if (state.query.trim() !== '') {
+        el.empty.textContent = '没有找到匹配的待办，换个关键词试试。';
+      } else if (state.filter === 'active') {
+        el.empty.textContent = '进行中的待办已清空，全部完成。';
+      } else if (state.filter === 'done') {
+        el.empty.textContent = '还没有已完成的待办。';
+      } else {
+        el.empty.textContent = '暂无待办。';
+      }
+    }
+
+    if (state.focusId !== null) {
+      var target = el.list.querySelector('.todo-toggle[data-id="' + state.focusId + '"]');
+      if (target && typeof target.focus === 'function') target.focus();
+      state.focusId = null;
+    }
+  }
+
+  function render() {
+    renderStats();
+    renderFilters();
+    renderComposer();
+    renderStatus();
+    renderList();
+  }
+
+  function showFormError(message) {
+    el.formError.textContent = message;
+    el.formError.hidden = false;
+  }
+
+  function clearFormError() {
+    el.formError.textContent = '';
+    el.formError.hidden = true;
+  }
+
+  function bindEvents() {
+    el.form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      addTodo(el.input.value);
+    });
+
+    el.input.addEventListener('input', function () {
+      if (!el.formError.hidden) clearFormError();
+    });
+
+    el.search.addEventListener('input', function () {
+      state.query = el.search.value;
+      renderList();
+    });
+
+    el.filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var next = btn.getAttribute('data-filter');
+        if (next !== 'all' && next !== 'active' && next !== 'done') return;
+        if (state.filter === next) return;
+        state.filter = next;
+        renderFilters();
+        renderList();
+      });
+    });
+
+    el.retryBtn.addEventListener('click', function () {
+      if (state.loading) return;
+      loadTodos();
+    });
+
+    el.dismissErrorBtn.addEventListener('click', function () {
+      state.listError = '';
+      renderStatus();
+    });
+  }
+
+  function init() {
+    el.form = byId('composerForm');
+    el.input = byId('titleInput');
+    el.addBtn = byId('addBtn');
+    el.formError = byId('formError');
+    el.search = byId('searchInput');
+    el.list = byId('todoList');
+    el.empty = byId('emptyState');
+    el.loading = byId('loadingState');
+    el.loadError = byId('loadError');
+    el.loadErrorText = byId('loadErrorText');
+    el.retryBtn = byId('retryBtn');
+    el.listError = byId('listError');
+    el.listErrorText = byId('listErrorText');
+    el.dismissErrorBtn = byId('dismissErrorBtn');
+    el.statTotal = byId('statTotal');
+    el.statDone = byId('statDone');
+    el.filterBtns = Array.prototype.slice.call(document.querySelectorAll('.filter-btn'));
+
+    bindEvents();
+    render();
+    loadTodos();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

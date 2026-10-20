@@ -1,0 +1,239 @@
+.code-project-preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--surface);
+}
+.code-runtime-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 47px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--secondary);
+}
+.code-runtime-bar .button {
+  margin-left: auto;
+  padding: 5px 10px;
+  min-height: 29px;
+  font-size: 12px;
+}
+.code-runtime-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.code-runtime-state i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.code-runtime-state.running i {
+  background: #4da182;
+}
+.code-runtime-state.starting i {
+  background: #ca9c4b;
+}
+.code-runtime-state.failed i {
+  background: #d86969;
+}
+.code-project-preview > iframe {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+  background: white;
+}
+.code-project-preview .module-error {
+  flex-shrink: 0;
+  margin: 8px 12px;
+  font-size: 12px;
+}
+.code-source-panel {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0;
+}
+.code-file-tree {
+  width: 190px;
+  min-width: 130px;
+  max-width: 35%;
+  flex-shrink: 0;
+  overflow: auto;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+  padding: 10px 0;
+}
+.code-file-tree header {
+  display: flex;
+  gap: 7px;
+  padding: 5px 12px 13px;
+  font-size: 11px;
+  align-items: center;
+}
+.code-file-tree header strong {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.code-file-tree button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 10px;
+  width: 100%;
+  text-align: left;
+  font-size: 11px;
+}
+.code-file-tree button span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.code-file-tree button svg {
+  flex-shrink: 0;
+  color: var(--secondary);
+}
+.code-file-tree button small {
+  color: var(--muted);
+  font-size: 9px;
+}
+.code-file-tree button:hover,
+.code-file-tree button.selected {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.code-local-library {
+  display: block;
+  padding: 18px 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.code-editor-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.code-editor-area header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font:
+    11px Consolas,
+    monospace;
+  display: flex;
+  justify-content: space-between;
+}
+.code-editor-area header small {
+  color: var(--muted);
+}
+.code-page-error {
+  padding: 12px 16px;
+  background: #fff2ee;
+  border-bottom: 1px solid #edd0c6;
+  color: #9c4532;
+  font-size: 12px;
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.code-page-error span {
+  flex-basis: 100%;
+  overflow-wrap: anywhere;
+}
+[data-theme='dark'] .code-page-error {
+  background: #392a2c;
+  color: #f2b9a3;
+  border-color: #573b3d;
+}
+.code-source-panel > label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 9px 14px;
+  color: var(--secondary);
+  font-size: 12px;
+}
+.code-source-panel select {
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+}
+.code-source-panel .text-source-editor {
+  flex: 1;
+  min-height: 0;
+  border-radius: 0;
+  border: 0;
+}
+.code-runtime-logs {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 16px;
+  margin: 0;
+  background: var(--hover);
+  color: var(--text);
+  font:
+    12px/1.8 Consolas,
+    monospace;
+}
+.code-preview-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px;
+  color: var(--secondary);
+  text-align: center;
+}
+.code-preview-empty h3 {
+  color: var(--text);
+  font-size: 15px;
+}
+.code-preview-empty p {
+  max-width: 350px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.code-save-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.code-save-bar span {
+  margin-right: auto;
+  color: var(--secondary);
+}
+.code-save-bar .button {
+  padding: 6px 9px;
+  font-size: 12px;
+}
+.recovered-web-result {
+  margin: 18px 0;
+  color: var(--secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.recovered-web-result summary {
+  cursor: pointer;
+  font-size: 12px;
+}

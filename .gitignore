@@ -1,0 +1,13 @@
+node_modules/
+.cache/
+dist/
+.opsbuddy/
+bin/
+release/
+cmd/opsbuddy-desktop/frontend/assets/
+cmd/opsbuddy-desktop/rsrc*.syso
+*.log
+*.tsbuildinfo
+.env
+playwright-report/
+test-results/
