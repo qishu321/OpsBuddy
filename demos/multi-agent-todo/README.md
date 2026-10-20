@@ -1,5 +1,7 @@
 # 多 Agent 后台演示：办公待办看板
 
+GitHub 只保留 `project/` 示例源码和 `todo-demo.opsbuddy-project.json` 可导入的演示历史；下述 runs、截图和本机验证文件为开发机器本地证据，不进入版本库。请在项目页导入 JSON 包查看角色、任务、审阅及最终源码。
+
 已完成的演示：`runs/20261020-103853/`，使用真实 `deepseek-flash`。三位成员完成且审阅通过，主 Agent 集成成功；9 项 HTTP 检查、8 项无窗口浏览器检查通过。前端曾超时一次，编排器自动重试成功，失败与成功记录均保留。
 
 可直接查看 `project/` 中的完整源码，或该运行目录中的 `preview-desktop.png` / `preview-compact.png`。摘要证据为 `verification-summary.json`。演示服务及浏览器检查进程已停止。0.17.1 已增加桌面导入，见下方；当前用户旧窗口没有被操作或重启。

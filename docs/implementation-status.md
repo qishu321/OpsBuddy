@@ -1,6 +1,14 @@
 # 实现状态与下一步
 
-更新：2026-10-20（Windows 桌面发行版 0.17.1：后台 Demo 接入项目、会话和协作画布）。此文件记录真实实现状态，不替代产品需求；下方旧版本章节为当时记录。
+更新：2026-10-20（0.18.0：Windows / Linux 桌面与 GitHub 发布）。此文件记录真实实现状态，不替代产品需求；下方旧版本章节为当时记录。
+
+## 0.18.0 双平台桌面与发布
+
+- 新增 Linux 原生 Wails 入口，复用 Controller、绑定、Go 后端与 React 界面；Linux 使用 GTK3 / WebKit2GTK 4.1，不是独立网页或仅输出提示的占位入口。原生文件选择、另存与 xdg-open 使用现有操作边界。
+- Windows 维持 DPAPI；Linux 使用 AES-256-GCM 与用户配置目录下独立随机256位密钥，校验目录/密钥所有者和权限，拒绝符号链接密钥及损坏密文。不是硬件凭据库；详细备份与迁移方式见 README。
+- Linux 默认数据目录遵循 XDG_CONFIG_HOME，Windows 保持 EXE 旁 .opsbuddy；都支持 --data。模型 Key 跨平台需重新配置。原生桌宠仍仅 Windows，不为 Linux 启动占位动画进程。
+- 新增中英文 README、Linux构建/虚拟显示验收、GitHub Actions Windows/Linux矩阵和tag校验发布。发布仅包含目标二进制和文档，无用户数据库/密钥/缓存。排除本机Demo运行产物，保留示例源码和可导入Demo。
+- 版本为0.18.0开发预览；目标为Windows x64与Ubuntu24.04兼容Linux x64，暂不提供macOS/ARM64/AppImage。实际构建和验收以 [0.18.0验证](verification-0.18.0.md) 与GitHub Actions为准。
 
 ## 0.17.1 后台 Demo 桌面导入
 

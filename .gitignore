@@ -5,6 +5,7 @@ dist/
 bin/
 release/
 cmd/opsbuddy-desktop/frontend/assets/
+cmd/opsbuddy-desktop/frontend/index.html
 cmd/opsbuddy-desktop/rsrc*.syso
 *.log
 *.tsbuildinfo

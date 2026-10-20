@@ -1,5 +1,12 @@
 # 项目级多 Agent 开发交接
 
+## 2026-10-20 发布接续：0.18.0
+
+按用户要求推送至 qishu321/OpsBuddy，补齐中英文README和Windows/Linux原生桌面支持。共享Controller从_windows.go改为跨平台文件，Windows ShellExecute拆到platform_windows.go，Linux使用xdg-open。新增Linux Wails入口和XDG数据目录；凭据使用独立用户密钥的AES-GCM，Windows保持DPAPI。原生桌宠暂仅Windows，Linux设置明确说明。版本0.18.0；CI矩阵、tag版本校验及Release工件不含用户数据。第一轮Linux源码与GTK/WebKit虚拟显示实际验收通过，Windows格式检查CRLF问题用.gitattributes统一LF修正。最终发布状态见GitHub Actions和 [0.18.0验证](verification-0.18.0.md)。
+
+本地生成嵌入前端由构建脚本管理，不入Git。清理Git索引中的演示runs与测试二进制但保留本机原文件；历史提交未重写。不得将Linux本地文件加密称为硬件/系统密钥环。
+
+
 ## 2026-10-20 当前交付：0.17.1
 
 用户反馈未看到后台 Demo，原因属实：之前只在独立演示数据目录执行，没有进入正在运行的桌面项目。不得再次把文件夹交付描述为已经出现在用户左侧。用户要求后台实现，不干扰其窗口。
